@@ -1,0 +1,9 @@
+{
+  "name": "prisma-seed",
+  "version": "1.0.0",
+  "prisma": {
+    "seed": "ts-node --transpile-only seed.ts"
+  }
+}
+
+

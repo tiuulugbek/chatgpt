@@ -1,0 +1,412 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Foydalanuvchi rollari
+enum UserRole {
+  SUPER_ADMIN    // Tizim administratori
+  BRANCH_MANAGER // Filial rahbari
+  BRANCH_STAFF   // Filial xodimi
+  MARKETING      // Marketing bo'limi
+  SUPPORT        // Texnik qo'llab-quvvatlash
+}
+
+// Filiallar
+model Branch {
+  id          String   @id @default(cuid())
+  name        String   // Filial nomi
+  code        String?  @unique // Filial kodi
+  address     String?
+  phone       String?
+  email       String?
+  region      String?  // Hudud (masalan, Toshkent, Andijon)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Aloqalar
+  users       User[]       @relation("BranchUsers")
+  usersMany   User[]       @relation("UserBranches")
+  leads       Lead[]
+  deals       Deal[]
+  contacts    Contact[]
+  reviews     Review[]
+
+  @@index([code])
+  @@index([region])
+}
+
+// Foydalanuvchilar
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  phone       String?
+  firstName   String
+  lastName    String
+  password    String   // Hashed password
+  role        UserRole @default(BRANCH_STAFF)
+  isActive    Boolean  @default(true)
+  lastLoginAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Filiallar bilan aloqa (ko'p filialga biriktirilishi mumkin)
+  branchId    String?
+  branch      Branch?  @relation("BranchUsers", fields: [branchId], references: [id], onDelete: SetNull)
+  
+  // Bir nechta filialga biriktirilishi mumkin
+  branches    Branch[] @relation("UserBranches")
+
+  // Aloqalar
+  assignedLeads Lead[]     @relation("LeadAssignee")
+  assignedDeals Deal[]     @relation("DealAssignee")
+  createdLeads  Lead[]     @relation("LeadCreator")
+  createdDeals  Deal[]     @relation("DealCreator")
+  messages      Message[]
+  auditLogs     AuditLog[]
+  leadNotes     LeadNote[]
+
+  @@index([email])
+  @@index([branchId])
+  @@index([role])
+}
+
+// Mijozlar (Contacts)
+model Contact {
+  id          String   @id @default(cuid())
+  firstName   String?
+  lastName    String?
+  fullName    String   // F.I.Sh.
+  phone       String?
+  email       String?
+  address     String?
+  company     String?  // Yuridik shaxs bo'lsa
+  tin         String?  // STIR
+  notes       String?  @db.Text
+  tags        String[] // Kategoriyalar, segmentlar
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Filial bilan aloqa
+  branchId    String?
+  branch      Branch?  @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
+  // Aloqalar
+  leads       Lead[]
+  deals       Deal[]
+  messages    Message[]
+  reviews     Review[]
+  socialAccounts SocialAccount[]
+
+  @@index([phone])
+  @@index([email])
+  @@index([branchId])
+}
+
+// Ijtimoiy tarmoq akkauntlari
+model SocialAccount {
+  id          String   @id @default(cuid())
+  platform    String   // instagram, facebook, telegram, youtube
+  accountId   String   // Platformadagi ID
+  username    String?
+  profileUrl  String?
+  metadata    Json?    // Qo'shimcha ma'lumotlar
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  contactId   String
+  contact     Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@unique([platform, accountId])
+  @@index([contactId])
+}
+
+// Lidlar (Murojaatlar)
+enum LeadStatus {
+  NEW           // Yangi
+  CONTACTED     // Aloqa qilindi
+  QUALIFIED     // Sifatli
+  PROPOSAL_SENT // Taklif yuborildi
+  NEGOTIATION   // Muzokara
+  WON           // Yutdi
+  LOST          // Yutqazdi
+  CLOSED        // Yopildi
+}
+
+enum LeadSource {
+  WEBSITE       // Veb-sayt
+  INSTAGRAM     // Instagram
+  FACEBOOK      // Facebook
+  TELEGRAM      // Telegram
+  YOUTUBE       // YouTube
+  PHONE         // Telefon qo'ng'iroq
+  EMAIL         // Email
+  GOOGLE_MAPS   // Google Maps
+  YANDEX_MAPS   // Yandex Maps
+  OTHER         // Boshqa
+}
+
+model Lead {
+  id          String     @id @default(cuid())
+  title       String     // Lid sarlavhasi
+  description String?     @db.Text
+  status      LeadStatus @default(NEW)
+  source      LeadSource
+  priority    String?    // yuqori, o'rta, past
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  closedAt    DateTime?
+
+  // Filial bilan aloqa
+  branchId    String
+  branch      Branch     @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  // Mijoz bilan aloqa
+  contactId   String?
+  contact     Contact?   @relation(fields: [contactId], references: [id], onDelete: SetNull)
+
+  // Mas'ul xodimlar
+  assigneeId  String?
+  assignee    User?      @relation("LeadAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  creatorId   String?
+  creator     User?      @relation("LeadCreator", fields: [creatorId], references: [id], onDelete: SetNull)
+
+  // Aloqalar
+  messages    Message[]
+  deals       Deal[]
+  notes       LeadNote[]
+
+  @@index([status])
+  @@index([branchId])
+  @@index([contactId])
+  @@index([assigneeId])
+  @@index([source])
+}
+
+// Lid izohlari
+model LeadNote {
+  id          String   @id @default(cuid())
+  content     String   @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  leadId      String
+  lead        Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([leadId])
+}
+
+// Bitimlar (Deals)
+enum DealStage {
+  LEAD          // Lid
+  CONTACTED     // Aloqa qilindi
+  PROPOSAL      // Taklif yuborildi
+  NEGOTIATION   // Muzokara
+  CLOSED_WON    // Yutdi
+  CLOSED_LOST   // Yutqazdi
+}
+
+model Deal {
+  id          String    @id @default(cuid())
+  title       String
+  amount      Decimal?  @db.Decimal(15, 2) // Summa
+  currency    String    @default("UZS")
+  stage       DealStage @default(LEAD)
+  probability Int?      @default(0) // Ehtimollik foizi
+  expectedCloseDate DateTime?
+  closedAt    DateTime?
+  lostReason  String?   @db.Text
+  notes       String?   @db.Text
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Filial bilan aloqa
+  branchId    String
+  branch      Branch    @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  // Mijoz bilan aloqa
+  contactId   String?
+  contact     Contact?  @relation(fields: [contactId], references: [id], onDelete: SetNull)
+
+  // Lid bilan aloqa
+  leadId      String?
+  lead        Lead?     @relation(fields: [leadId], references: [id], onDelete: SetNull)
+
+  // Mas'ul xodimlar
+  assigneeId  String?
+  assignee    User?     @relation("DealAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  creatorId   String?
+  creator     User?     @relation("DealCreator", fields: [creatorId], references: [id], onDelete: SetNull)
+
+  @@index([stage])
+  @@index([branchId])
+  @@index([contactId])
+  @@index([assigneeId])
+  @@index([expectedCloseDate])
+}
+
+// Xabarlar (Messages) - barcha kanallardan kelgan xabarlar
+enum MessageType {
+  INSTAGRAM_COMMENT
+  INSTAGRAM_DM
+  FACEBOOK_COMMENT
+  FACEBOOK_MESSAGE
+  TELEGRAM
+  YOUTUBE_COMMENT
+  EMAIL
+  PHONE_CALL
+  INTERNAL_NOTE
+}
+
+enum MessageDirection {
+  INBOUND  // Mijozdan kelgan
+  OUTBOUND // Mijozga yuborilgan
+}
+
+model Message {
+  id          String          @id @default(cuid())
+  type        MessageType
+  direction   MessageDirection
+  content     String          @db.Text
+  externalId  String?         // Platformadagi ID
+  platformUrl String?         // Platformadagi havola
+  metadata    Json?           // Qo'shimcha ma'lumotlar
+  isRead      Boolean         @default(false)
+  readAt      DateTime?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  // Mijoz bilan aloqa
+  contactId   String?
+  contact     Contact?        @relation(fields: [contactId], references: [id], onDelete: SetNull)
+
+  // Lid bilan aloqa
+  leadId      String?
+  lead        Lead?           @relation(fields: [leadId], references: [id], onDelete: SetNull)
+
+  // Xodim bilan aloqa
+  userId      String?
+  user        User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([contactId])
+  @@index([leadId])
+  @@index([type])
+  @@index([createdAt])
+  @@index([isRead])
+}
+
+// Sharhlar (Reviews) - Google Maps, Yandex Maps
+enum ReviewPlatform {
+  GOOGLE_MAPS
+  YANDEX_MAPS
+  TRIPADVISOR
+  TWOGIS
+  OTHER
+}
+
+model Review {
+  id          String        @id @default(cuid())
+  platform    ReviewPlatform
+  rating      Int           // 1-5 yulduz
+  comment     String?       @db.Text
+  authorName  String?
+  authorPhoto String?
+  externalId  String?       // Platformadagi ID
+  platformUrl String?       // Platformadagi havola
+  response    String?       @db.Text // Javob matni
+  respondedAt DateTime?
+  respondedBy String?       // Kim javob bergan
+  metadata    Json?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Filial bilan aloqa
+  branchId    String?
+  branch      Branch?       @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
+  // Mijoz bilan aloqa (agar aniqlangan bo'lsa)
+  contactId   String?
+  contact     Contact?      @relation(fields: [contactId], references: [id], onDelete: SetNull)
+
+  @@index([platform])
+  @@index([branchId])
+  @@index([rating])
+  @@index([createdAt])
+}
+
+// Audit log (Faoliyat jurnali)
+model AuditLog {
+  id          String   @id @default(cuid())
+  action      String   // amal turi (CREATE, UPDATE, DELETE, LOGIN, etc.)
+  entityType  String   // entity turi (Lead, Deal, Contact, etc.)
+  entityId    String   // entity ID
+  changes     Json?    // O'zgarishlar
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@index([action])
+}
+
+// Sozlamalar
+model Settings {
+  id                    String   @id @default("singleton")
+  
+  // Instagram integratsiya
+  instagramAccessToken   String?
+  instagramAppId         String?
+  instagramAppSecret     String?
+  
+  // Facebook integratsiya
+  facebookAccessToken    String?
+  facebookAppId          String?
+  facebookAppSecret      String?
+  facebookPageId          String?
+  
+  // Telegram integratsiya
+  telegramBotToken       String?
+  telegramWebhookUrl      String?
+  
+  // YouTube integratsiya
+  youtubeApiKey          String?
+  youtubeChannelId       String?
+  
+  // Google Maps integratsiya
+  googleMapsApiKey       String?
+  googlePlaceIds         String[] // Filiallar uchun Place ID'lar
+  
+  // Yandex Maps integratsiya
+  yandexApiKey           String?
+  yandexOrgIds           String[] // Filiallar uchun Organization ID'lar
+  
+  // Email integratsiya
+  emailImapHost          String?
+  emailImapPort          Int?
+  emailImapUser          String?
+  emailImapPassword      String?
+  
+  // Boshqa sozlamalar
+  defaultBranchId        String?
+  autoAssignEnabled      Boolean @default(false)
+  notificationEnabled    Boolean @default(true)
+  
+  updatedAt               DateTime @updatedAt
+}
+
