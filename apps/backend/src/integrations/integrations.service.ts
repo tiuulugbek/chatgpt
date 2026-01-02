@@ -230,4 +230,130 @@ export class IntegrationsService {
       };
     }
   }
+
+  /**
+   * Barcha integratsiyalardan xabarlarni olish va saqlash
+   */
+  async syncAllMessages() {
+    const settings = await this.prisma.settings.findUnique({
+      where: { id: 'singleton' },
+    });
+
+    if (!settings) {
+      this.logger.warn('Settings not found');
+      return;
+    }
+
+    const defaultBranch = await this.prisma.branch.findFirst({
+      orderBy: { createdAt: 'asc' },
+    });
+
+    if (!defaultBranch) {
+      this.logger.warn('No branch found');
+      return;
+    }
+
+    const results = {
+      instagram: { success: 0, error: 0 },
+      facebook: { success: 0, error: 0 },
+      telegram: { success: 0, error: 0 },
+      youtube: { success: 0, error: 0 },
+    };
+
+    // Instagram izohlarni olish
+    if (settings.instagramAccessToken && settings.instagramAppId) {
+      try {
+        // Bu yerda media ID'lar kerak bo'ladi, lekin hozircha skip qilamiz
+        this.logger.log('Instagram sync skipped - media IDs required');
+      } catch (error: any) {
+        this.logger.error('Instagram sync error:', error);
+        results.instagram.error++;
+      }
+    }
+
+    // Facebook izohlarni olish
+    if (settings.facebookAccessToken && settings.facebookPageId) {
+      try {
+        const comments = await this.facebookService.fetchComments(
+          settings.facebookAccessToken,
+          settings.facebookPageId,
+        );
+        for (const comment of comments) {
+          try {
+            await this.facebookService.saveCommentAsMessage(
+              comment,
+              settings.facebookPageId,
+              defaultBranch.id,
+            );
+            results.facebook.success++;
+          } catch (error: any) {
+            this.logger.error('Save Facebook comment error:', error);
+            results.facebook.error++;
+          }
+        }
+      } catch (error: any) {
+        this.logger.error('Facebook sync error:', error);
+        results.facebook.error++;
+      }
+    }
+
+    // Telegram xabarlarni olish
+    if (settings.telegramBotToken) {
+      try {
+        const updates = await this.telegramService.fetchUpdates(settings.telegramBotToken);
+        for (const update of updates) {
+          try {
+            await this.telegramService.saveMessageAsMessage(update, defaultBranch.id);
+            results.telegram.success++;
+          } catch (error: any) {
+            this.logger.error('Save Telegram message error:', error);
+            results.telegram.error++;
+          }
+        }
+      } catch (error: any) {
+        this.logger.error('Telegram sync error:', error);
+        results.telegram.error++;
+      }
+    }
+
+    // YouTube izohlarni olish
+    if (settings.youtubeApiKey && settings.youtubeChannelId) {
+      try {
+        const videos = await this.youtubeService.fetchChannelVideos(
+          settings.youtubeApiKey,
+          settings.youtubeChannelId,
+        );
+        for (const video of videos.slice(0, 5)) {
+          // Faqat oxirgi 5 ta videoni tekshiramiz
+          try {
+            const comments = await this.youtubeService.fetchComments(
+              settings.youtubeApiKey,
+              video.id.videoId,
+            );
+            for (const commentThread of comments) {
+              try {
+                await this.youtubeService.saveCommentAsMessage(
+                  commentThread,
+                  video.id.videoId,
+                  defaultBranch.id,
+                );
+                results.youtube.success++;
+              } catch (error: any) {
+                this.logger.error('Save YouTube comment error:', error);
+                results.youtube.error++;
+              }
+            }
+          } catch (error: any) {
+            this.logger.error('YouTube comments fetch error:', error);
+            results.youtube.error++;
+          }
+        }
+      } catch (error: any) {
+        this.logger.error('YouTube sync error:', error);
+        results.youtube.error++;
+      }
+    }
+
+    return results;
+  }
 }
