@@ -5,6 +5,8 @@ import { InstagramService } from './services/instagram.service';
 import { FacebookService } from './services/facebook.service';
 import { TelegramIntegrationService } from './services/telegram.service';
 import { YouTubeService } from './services/youtube.service';
+import { GoogleMapsService } from './services/google-maps.service';
+import { YandexMapsService } from './services/yandex-maps.service';
 import axios from 'axios';
 
 @Injectable()
@@ -18,6 +20,8 @@ export class IntegrationsService {
     private facebookService: FacebookService,
     private telegramService: TelegramIntegrationService,
     private youtubeService: YouTubeService,
+    private googleMapsService: GoogleMapsService,
+    private yandexMapsService: YandexMapsService,
   ) {}
 
   async getSettings() {
@@ -196,14 +200,28 @@ export class IntegrationsService {
           // Google Maps API test (Place Details)
           if (settings.googlePlaceIds && settings.googlePlaceIds.length > 0) {
             const placeId = settings.googlePlaceIds[0];
-            const mapsResponse = await axios.get(
-              `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&key=${settings.googleMapsApiKey}`,
-            );
-            return {
-              success: true,
-              message: 'Google Maps integratsiyasi muvaffaqiyatli',
-              data: mapsResponse.data.result,
-            };
+            try {
+              const reviewsData = await this.googleMapsService.fetchReviews(
+                settings.googleMapsApiKey,
+                placeId,
+              );
+              return {
+                success: true,
+                message: 'Google Maps integratsiyasi muvaffaqiyatli',
+                data: {
+                  placeId,
+                  rating: reviewsData.rating,
+                  totalRatings: reviewsData.totalRatings,
+                  reviewsCount: reviewsData.reviews.length,
+                },
+              };
+            } catch (error: any) {
+              return {
+                success: false,
+                message: 'Google Maps API testida xatolik',
+                error: error.message,
+              };
+            }
           }
           return {
             success: true,
