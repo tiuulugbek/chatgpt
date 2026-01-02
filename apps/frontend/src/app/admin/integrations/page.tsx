@@ -49,6 +49,20 @@ export default function AdminIntegrationsPage() {
     },
   });
 
+  const syncMutation = useMutation({
+    mutationFn: async () => {
+      const response = await api.post('/integrations/sync');
+      return response.data;
+    },
+    onSuccess: (data) => {
+      alert(`Sinxronlashtirish yakunlandi!\nInstagram: ${data.instagram?.success || 0} muvaffaqiyatli\nFacebook: ${data.facebook?.success || 0} muvaffaqiyatli\nTelegram: ${data.telegram?.success || 0} muvaffaqiyatli\nYouTube: ${data.youtube?.success || 0} muvaffaqiyatli`);
+      queryClient.invalidateQueries({ queryKey: ['messages'] });
+    },
+    onError: (error: any) => {
+      alert('Sinxronlashtirishda xatolik: ' + (error.response?.data?.message || error.message));
+    },
+  });
+
   const handleOpenModal = (platform: string) => {
     setActivePlatform(platform);
     const integration = integrations?.[platform];
@@ -182,9 +196,18 @@ export default function AdminIntegrationsPage() {
     <AdminGuard>
       <DashboardLayout>
         <div className="space-y-6">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Integratsiyalar</h1>
-            <p className="text-gray-600 mt-1">Ijtimoiy tarmoqlar va xizmatlar bilan integratsiyalarni sozlang</p>
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Integratsiyalar</h1>
+              <p className="text-gray-600 mt-1">Ijtimoiy tarmoqlar va xizmatlar bilan integratsiyalarni sozlang</p>
+            </div>
+            <button
+              onClick={() => syncMutation.mutate()}
+              disabled={syncMutation.isPending}
+              className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+            >
+              {syncMutation.isPending ? 'Sinxronlashtirilmoqda...' : '🔄 Xabarlarni sinxronlashtirish'}
+            </button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
