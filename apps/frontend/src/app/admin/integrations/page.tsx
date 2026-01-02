@@ -51,7 +51,28 @@ export default function AdminIntegrationsPage() {
 
   const handleOpenModal = (platform: string) => {
     setActivePlatform(platform);
-    setFormData({});
+    const integration = integrations?.[platform];
+    const platformConfig = platforms.find((p) => p.id === platform);
+    
+    // Mavjud sozlamalarni formData'ga yuklash
+    const initialData: any = {};
+    if (platformConfig) {
+      platformConfig.fields.forEach((field) => {
+        if (field.key === 'accessToken' && integration?.hasToken) {
+          initialData[field.key] = '••••••••'; // Masked value
+        } else if (field.key === 'appSecret' && integration?.hasSecret) {
+          initialData[field.key] = '••••••••'; // Masked value
+        } else if (field.key === 'botToken' && integration?.hasToken) {
+          initialData[field.key] = '••••••••'; // Masked value
+        } else if (field.key === 'apiKey' && integration?.hasApiKey) {
+          initialData[field.key] = '••••••••'; // Masked value
+        } else if (integration && integration[field.key]) {
+          initialData[field.key] = integration[field.key];
+        }
+      });
+    }
+    
+    setFormData(initialData);
     setTestResult(null);
   };
 
@@ -63,7 +84,16 @@ export default function AdminIntegrationsPage() {
 
   const handleSubmit = (e: React.FormEvent, platform: string) => {
     e.preventDefault();
-    updateMutation.mutate({ platform, data: formData });
+    
+    // Masked qiymatlarni olib tashlash
+    const cleanData: any = {};
+    Object.keys(formData).forEach((key) => {
+      if (formData[key] && formData[key] !== '••••••••') {
+        cleanData[key] = formData[key];
+      }
+    });
+    
+    updateMutation.mutate({ platform, data: cleanData });
   };
 
   const handleTest = (platform: string) => {
@@ -189,20 +219,20 @@ export default function AdminIntegrationsPage() {
 
                   <p className="text-sm text-gray-600 mb-4">{platform.description}</p>
 
-                  <div className="flex gap-2">
+                  <div className="space-y-2">
                     <button
                       onClick={() => handleOpenModal(platform.id)}
-                      className="flex-1 bg-primary text-white px-4 py-2 rounded-lg hover:bg-opacity-90 text-sm font-medium"
+                      className="w-full bg-primary text-white px-4 py-2 rounded-lg hover:bg-opacity-90 text-sm font-medium"
                     >
-                      Sozlash
+                      {isEnabled ? 'Sozlamalarni yangilash' : 'Sozlash'}
                     </button>
                     {isEnabled && (
                       <button
                         onClick={() => handleTest(platform.id)}
                         disabled={testMutation.isPending}
-                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium disabled:opacity-50"
+                        className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium disabled:opacity-50"
                       >
-                        {testMutation.isPending ? 'Test...' : 'Test'}
+                        {testMutation.isPending ? 'Test qilinmoqda...' : '🔍 Test qilish'}
                       </button>
                     )}
                   </div>
@@ -234,40 +264,62 @@ export default function AdminIntegrationsPage() {
                   >
                     {platforms
                       .find((p) => p.id === activePlatform)
-                      ?.fields.map((field) => (
-                        <div key={field.key}>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            {field.label}
-                          </label>
-                          {field.key === 'placeIds' || field.key === 'orgIds' ? (
-                            <textarea
-                              value={formData[field.key] || ''}
-                              onChange={(e) =>
-                                setFormData({
-                                  ...formData,
-                                  [field.key]: e.target.value,
-                                })
-                              }
-                              placeholder={field.placeholder}
-                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                              rows={3}
-                            />
-                          ) : (
-                            <input
-                              type={field.type}
-                              value={formData[field.key] || ''}
-                              onChange={(e) =>
-                                setFormData({
-                                  ...formData,
-                                  [field.key]: e.target.value,
-                                })
-                              }
-                              placeholder={field.placeholder}
-                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                            />
-                          )}
-                        </div>
-                      ))}
+                      ?.fields.map((field) => {
+                        const currentValue = formData[field.key] || '';
+                        const isMasked = currentValue === '••••••••';
+                        const integration = integrations?.[activePlatform];
+                        
+                        return (
+                          <div key={field.key}>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              {field.label}
+                              {isMasked && (
+                                <span className="ml-2 text-xs text-gray-500">
+                                  (mavjud sozlama - yangi qiymat kiriting)
+                                </span>
+                              )}
+                            </label>
+                            {field.key === 'placeIds' || field.key === 'orgIds' ? (
+                              <textarea
+                                value={Array.isArray(currentValue) ? currentValue.join(', ') : currentValue}
+                                onChange={(e) =>
+                                  setFormData({
+                                    ...formData,
+                                    [field.key]: e.target.value,
+                                  })
+                                }
+                                placeholder={field.placeholder}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                rows={3}
+                              />
+                            ) : (
+                              <div>
+                                <input
+                                  type={field.type}
+                                  value={isMasked ? '' : currentValue}
+                                  onChange={(e) =>
+                                    setFormData({
+                                      ...formData,
+                                      [field.key]: e.target.value,
+                                    })
+                                  }
+                                  placeholder={
+                                    isMasked
+                                      ? 'Yangi qiymat kiriting yoki bo\'sh qoldiring'
+                                      : field.placeholder
+                                  }
+                                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                />
+                                {isMasked && (
+                                  <p className="mt-1 text-xs text-gray-500">
+                                    Mavjud sozlama saqlanadi, agar yangi qiymat kiritmasangiz
+                                  </p>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
 
                     {testResult && (
                       <div
@@ -277,12 +329,34 @@ export default function AdminIntegrationsPage() {
                             : 'bg-red-50 border border-red-200 text-red-700'
                         }`}
                       >
-                        <p className="font-medium">{testResult.message}</p>
-                        {testResult.data && (
-                          <pre className="mt-2 text-xs overflow-auto">
-                            {JSON.stringify(testResult.data, null, 2)}
-                          </pre>
-                        )}
+                        <div className="flex items-start gap-2">
+                          <span className="text-xl">
+                            {testResult.success ? '✅' : '❌'}
+                          </span>
+                          <div className="flex-1">
+                            <p className="font-medium">{testResult.message}</p>
+                            {testResult.data && (
+                              <details className="mt-2">
+                                <summary className="cursor-pointer text-sm font-medium">
+                                  Batafsil ma'lumot
+                                </summary>
+                                <pre className="mt-2 text-xs overflow-auto bg-white p-2 rounded border">
+                                  {JSON.stringify(testResult.data, null, 2)}
+                                </pre>
+                              </details>
+                            )}
+                            {testResult.error && (
+                              <details className="mt-2">
+                                <summary className="cursor-pointer text-sm font-medium">
+                                  Xatolik ma'lumotlari
+                                </summary>
+                                <pre className="mt-2 text-xs overflow-auto bg-white p-2 rounded border">
+                                  {JSON.stringify(testResult.error, null, 2)}
+                                </pre>
+                              </details>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     )}
 

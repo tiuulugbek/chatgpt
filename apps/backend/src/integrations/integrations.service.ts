@@ -20,12 +20,14 @@ export class IntegrationsService {
         enabled: !!(settings?.instagramAccessToken && settings?.instagramAppId),
         appId: settings?.instagramAppId,
         hasToken: !!settings?.instagramAccessToken,
+        hasSecret: !!settings?.instagramAppSecret,
       },
       facebook: {
         enabled: !!(settings?.facebookAccessToken && settings?.facebookAppId),
         appId: settings?.facebookAppId,
         pageId: settings?.facebookPageId,
         hasToken: !!settings?.facebookAccessToken,
+        hasSecret: !!settings?.facebookAppSecret,
       },
       telegram: {
         enabled: !!settings?.telegramBotToken,
@@ -55,31 +57,59 @@ export class IntegrationsService {
 
     switch (platform) {
       case 'instagram':
-        if (data.accessToken) updateData.instagramAccessToken = data.accessToken;
+        if (data.accessToken && data.accessToken !== '••••••••') {
+          updateData.instagramAccessToken = data.accessToken;
+        }
         if (data.appId) updateData.instagramAppId = data.appId;
-        if (data.appSecret) updateData.instagramAppSecret = data.appSecret;
+        if (data.appSecret && data.appSecret !== '••••••••') {
+          updateData.instagramAppSecret = data.appSecret;
+        }
         break;
       case 'facebook':
-        if (data.accessToken) updateData.facebookAccessToken = data.accessToken;
+        if (data.accessToken && data.accessToken !== '••••••••') {
+          updateData.facebookAccessToken = data.accessToken;
+        }
         if (data.appId) updateData.facebookAppId = data.appId;
-        if (data.appSecret) updateData.facebookAppSecret = data.appSecret;
+        if (data.appSecret && data.appSecret !== '••••••••') {
+          updateData.facebookAppSecret = data.appSecret;
+        }
         if (data.pageId) updateData.facebookPageId = data.pageId;
         break;
       case 'telegram':
-        if (data.botToken) updateData.telegramBotToken = data.botToken;
+        if (data.botToken && data.botToken !== '••••••••') {
+          updateData.telegramBotToken = data.botToken;
+        }
         if (data.webhookUrl !== undefined) updateData.telegramWebhookUrl = data.webhookUrl;
         break;
       case 'youtube':
-        if (data.apiKey) updateData.youtubeApiKey = data.apiKey;
+        if (data.apiKey && data.apiKey !== '••••••••') {
+          updateData.youtubeApiKey = data.apiKey;
+        }
         if (data.channelId) updateData.youtubeChannelId = data.channelId;
         break;
       case 'googleMaps':
-        if (data.apiKey) updateData.googleMapsApiKey = data.apiKey;
-        if (data.placeIds) updateData.googlePlaceIds = data.placeIds;
+        if (data.apiKey && data.apiKey !== '••••••••') {
+          updateData.googleMapsApiKey = data.apiKey;
+        }
+        if (data.placeIds) {
+          // String bo'lsa, array'ga o'tkazish
+          const placeIdsArray = typeof data.placeIds === 'string'
+            ? data.placeIds.split(',').map((id: string) => id.trim()).filter(Boolean)
+            : data.placeIds;
+          updateData.googlePlaceIds = placeIdsArray;
+        }
         break;
       case 'yandexMaps':
-        if (data.apiKey) updateData.yandexApiKey = data.apiKey;
-        if (data.orgIds) updateData.yandexOrgIds = data.orgIds;
+        if (data.apiKey && data.apiKey !== '••••••••') {
+          updateData.yandexApiKey = data.apiKey;
+        }
+        if (data.orgIds) {
+          // String bo'lsa, array'ga o'tkazish
+          const orgIdsArray = typeof data.orgIds === 'string'
+            ? data.orgIds.split(',').map((id: string) => id.trim()).filter(Boolean)
+            : data.orgIds;
+          updateData.yandexOrgIds = orgIdsArray;
+        }
         break;
     }
 
