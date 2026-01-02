@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, UseGuards, Request, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ReportsService } from './reports.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
@@ -12,8 +12,8 @@ export class ReportsController {
 
   @Get('dashboard')
   @ApiOperation({ summary: 'Dashboard statistikasi' })
-  getDashboard(@Request() req) {
-    return this.reportsService.getDashboard(req.user);
+  getDashboard(@Request() req, @Query('range') range?: string) {
+    return this.reportsService.getDashboard(req.user, range);
   }
 }
 

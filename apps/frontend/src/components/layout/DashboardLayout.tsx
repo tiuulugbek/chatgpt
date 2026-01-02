@@ -48,44 +48,50 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Sidebar */}
-      <aside className="fixed left-0 top-0 h-full w-64 bg-primary text-white">
-        <div className="p-6">
-          <h2 className="text-xl font-bold mb-2">Soundz CRM</h2>
-          {user && (
-            <div className="text-sm text-white text-opacity-80 mb-6">
-              <div>{user.firstName} {user.lastName}</div>
-              <div className="text-xs mt-1">{user.role}</div>
-            </div>
-          )}
-          <nav className="space-y-2">
+      <aside className="fixed left-0 top-0 h-full w-64 bg-gradient-to-b from-primary to-purple-900 text-white shadow-2xl">
+        <div className="p-6 h-full flex flex-col">
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold mb-2 flex items-center">
+              <span className="bg-white bg-opacity-20 rounded-lg p-2 mr-2">🎵</span>
+              Soundz CRM
+            </h2>
+            {user && (
+              <div className="mt-4 p-3 bg-white bg-opacity-10 rounded-lg backdrop-blur-sm">
+                <div className="font-medium">{user.firstName} {user.lastName}</div>
+                <div className="text-xs mt-1 text-white text-opacity-70">{user.role}</div>
+              </div>
+            )}
+          </div>
+          <nav className="flex-1 space-y-1 overflow-y-auto">
             {menuItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center space-x-3 px-4 py-2 rounded-lg transition ${
+                className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all ${
                   pathname === item.href
-                    ? 'bg-white bg-opacity-20'
-                    : 'hover:bg-white hover:bg-opacity-10'
+                    ? 'bg-white bg-opacity-25 shadow-lg transform scale-105'
+                    : 'hover:bg-white hover:bg-opacity-15'
                 }`}
               >
-                <span>{item.icon}</span>
-                <span>{item.label}</span>
+                <span className="text-xl">{item.icon}</span>
+                <span className="font-medium">{item.label}</span>
               </Link>
             ))}
           </nav>
-        </div>
-        <div className="absolute bottom-0 left-0 right-0 p-6">
-          <button
-            onClick={logout}
-            className="w-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white py-2 px-4 rounded-lg transition"
-          >
-            Chiqish
-          </button>
+          <div className="mt-4 pt-4 border-t border-white border-opacity-20">
+            <button
+              onClick={logout}
+              className="w-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white py-3 px-4 rounded-lg transition-all font-medium flex items-center justify-center space-x-2"
+            >
+              <span>🚪</span>
+              <span>Chiqish</span>
+            </button>
+          </div>
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className="ml-64 p-8">{children}</main>
+      <main className="ml-64 p-8 bg-gray-50 min-h-screen">{children}</main>
     </div>
   );
 }

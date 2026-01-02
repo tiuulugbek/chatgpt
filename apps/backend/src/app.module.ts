@@ -16,6 +16,7 @@ import { MessagesModule } from './messages/messages.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { ReportsModule } from './reports/reports.module';
 import { IntegrationsModule } from './integrations/integrations.module';
+import { SearchModule } from './search/search.module';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { IntegrationsModule } from './integrations/integrations.module';
     ReviewsModule,
     ReportsModule,
     IntegrationsModule,
+    SearchModule,
   ],
   controllers: [AppController],
   providers: [AppService],
