@@ -42,7 +42,7 @@ export class DealsController {
   @ApiOperation({ summary: 'Savdo voronkasi (pipeline)' })
   @ApiQuery({ name: 'branchId', required: false })
   getPipeline(@Request() req, @Query('branchId') branchId?: string) {
-    return this.dealsService.getPipeline(branchId, req.user);
+    return this.dealsService.getPipeline(branchId || '', req.user);
   }
 
   @Get(':id')

@@ -65,15 +65,11 @@ export default function DealsPage() {
     }
   };
 
-  // Deals'ni stage bo'yicha guruhlash
-  const dealsByStage = pipelineData?.reduce((acc: any, deal: any) => {
-    const stage = deal.stage || 'LEAD';
-    if (!acc[stage]) {
-      acc[stage] = [];
-    }
-    acc[stage].push(deal);
-    return acc;
-  }, {}) || {};
+  // Backend'dan kelgan pipeline object'ni ishlatish
+  const dealsByStage = pipelineData || {};
+
+  // Barcha deals'ni bitta array'ga yig'ish (statistikalar uchun)
+  const allDeals = Object.values(dealsByStage).flat() as any[];
 
   // Har bir stage uchun summani hisoblash
   const getStageTotal = (stage: string) => {
@@ -249,7 +245,7 @@ export default function DealsPage() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {pipelineData?.map((deal: any) => {
+                  {allDeals?.map((deal: any) => {
                     const config = stageConfig[deal.stage] || stageConfig.LEAD;
                     return (
                       <tr key={deal.id} className="hover:bg-gray-50">
@@ -297,7 +293,7 @@ export default function DealsPage() {
                 </tbody>
               </table>
             </div>
-            {(!pipelineData || pipelineData.length === 0) && (
+            {allDeals.length === 0 && (
               <div className="text-center py-12">
                 <div className="text-gray-500">Hozircha bitimlar mavjud emas</div>
                 <Link
@@ -312,18 +308,18 @@ export default function DealsPage() {
         )}
 
         {/* Pipeline Statistikasi */}
-        {pipelineData && pipelineData.length > 0 && (
+        {allDeals.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-white rounded-lg shadow p-6">
               <div className="text-sm text-gray-500 mb-1">Jami Bitimlar</div>
               <div className="text-3xl font-bold text-gray-900">
-                {pipelineData.length}
+                {allDeals.length}
               </div>
             </div>
             <div className="bg-white rounded-lg shadow p-6">
               <div className="text-sm text-gray-500 mb-1">Jami Summa</div>
               <div className="text-3xl font-bold text-primary">
-                {pipelineData
+                {allDeals
                   .reduce((sum: number, deal: any) => sum + (parseFloat(deal.amount) || 0), 0)
                   .toLocaleString('uz-UZ')}{' '}
                 UZS
