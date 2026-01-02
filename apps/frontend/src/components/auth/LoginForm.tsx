@@ -46,7 +46,7 @@ export function LoginForm() {
         console.log('[LoginForm] Token localStorage ga saqlandi');
         // User ma'lumotlarini cache'ga qo'shish
         queryClient.setQueryData(['me'], data.user);
-        console.log('[LoginForm] Dashboard ga yo\'naltirilmoqda...');
+        console.log('[LoginForm] Dashboard ga yonaltirilmoqda...');
         router.push('/dashboard');
       } else {
         console.error('[LoginForm] Token topilmadi!', data);
@@ -55,7 +55,7 @@ export function LoginForm() {
     },
     onError: (err: any) => {
       console.error('[LoginForm] onError chaqirildi:', err);
-      const errorMessage = err.response?.data?.message || err.message || 'Email yoki parol noto\'g\'ri';
+      const errorMessage = err.response?.data?.message || err.message || 'Email yoki parol notogri';
       console.error('[LoginForm] Xatolik xabari:', errorMessage);
       setError(errorMessage);
     },
