@@ -5,9 +5,11 @@ import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function DashboardPage() {
   const router = useRouter();
+  const { user, isLoading: authLoading } = useAuth();
 
   const { data: dashboardData, isLoading } = useQuery({
     queryKey: ['dashboard'],
@@ -15,16 +17,16 @@ export default function DashboardPage() {
       const response = await api.get('/reports/dashboard');
       return response.data;
     },
+    enabled: !!user,
   });
 
   useEffect(() => {
-    const token = localStorage.getItem('access_token');
-    if (!token) {
+    if (!authLoading && !user) {
       router.push('/');
     }
-  }, [router]);
+  }, [user, authLoading, router]);
 
-  if (isLoading) {
+  if (authLoading || isLoading) {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-64">
@@ -32,6 +34,10 @@ export default function DashboardPage() {
         </div>
       </DashboardLayout>
     );
+  }
+
+  if (!user) {
+    return null;
   }
 
   return (
@@ -80,5 +86,6 @@ export default function DashboardPage() {
     </DashboardLayout>
   );
 }
+
 
 

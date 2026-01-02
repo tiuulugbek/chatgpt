@@ -17,3 +17,4 @@ export class UpdateDealDto extends PartialType(CreateDealDto) {
 }
 
 
+

@@ -12,3 +12,4 @@ export class UpdateLeadDto extends PartialType(CreateLeadDto) {
 }
 
 
+

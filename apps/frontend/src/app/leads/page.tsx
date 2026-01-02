@@ -3,14 +3,18 @@
 import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function LeadsPage() {
+  const { user } = useAuth();
+  
   const { data: leads, isLoading } = useQuery({
     queryKey: ['leads'],
     queryFn: async () => {
       const response = await api.get('/leads');
       return response.data;
     },
+    enabled: !!user,
   });
 
   return (
@@ -73,5 +77,6 @@ export default function LeadsPage() {
     </DashboardLayout>
   );
 }
+
 
 

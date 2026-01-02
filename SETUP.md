@@ -66,3 +66,4 @@ Seed script quyidagi test foydalanuvchilarni yaratadi:
 4. Telegram mini-app
 
 
+

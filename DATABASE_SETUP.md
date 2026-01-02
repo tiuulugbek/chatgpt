@@ -87,3 +87,4 @@ Agar database ulanmasa:
    - Bizning holat: `postgresql://postgres:Bismillah@localhost:5432/crm_db?schema=public`
 
 
+

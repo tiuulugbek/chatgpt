@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
 
 interface LoginData {
@@ -12,6 +12,7 @@ interface LoginData {
 
 export function LoginForm() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [formData, setFormData] = useState<LoginData>({
     email: '',
     password: '',
@@ -25,6 +26,8 @@ export function LoginForm() {
     },
     onSuccess: (data) => {
       localStorage.setItem('access_token', data.accessToken);
+      // User ma'lumotlarini cache'ga qo'shish
+      queryClient.setQueryData(['me'], data.user);
       router.push('/dashboard');
     },
     onError: (err: any) => {
@@ -109,5 +112,6 @@ export function LoginForm() {
     </div>
   );
 }
+
 
 

@@ -85,3 +85,4 @@ Tizim to'liq o'zbek tilida ishlaydi.
 - Ma'lumotlarni shifrlash
 
 
+
