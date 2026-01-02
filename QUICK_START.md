@@ -1,134 +1,68 @@
 # Soundz CRM - Tezkor Boshlash
 
-## ✅ Database Sozlangan
+## Eng Oson Usul
 
-Database ma'lumotlari:
-- **Database**: `crm_db`
-- **User**: `postgres`
-- **Parol**: `Bismillah`
+### 1. PowerShell'da quyidagi buyruqlarni ketma-ket bajaring:
 
-## 🚀 Birinchi Qadamlar
-
-### 1. Dependencies O'rnatish
-
-```bash
+```powershell
+# Loyiha papkasiga o'ting
 cd C:\Users\AzzaPRO\Desktop\Soundz-crm
+
+# Dependencies o'rnatish (faqat birinchi marta)
 pnpm install
-```
 
-### 2. Environment Sozlash
-
-`apps/backend/.env` faylini yarating (agar yo'q bo'lsa):
-
-```env
-DATABASE_URL="postgresql://postgres:Bismillah@localhost:5432/crm_db?schema=public"
-JWT_SECRET=soundz-crm-secret-key-change-in-production-2024
-JWT_EXPIRES_IN=7d
-PORT=3001
-NODE_ENV=development
-FRONTEND_URL=http://localhost:3000
-```
-
-### 3. Database Migrate
-
-```bash
-# Prisma client generate qilish
+# Database sozlash (faqat birinchi marta)
 pnpm db:generate
-
-# Database migrate qilish (jadval yaratish)
 pnpm db:migrate
-
-# Test ma'lumotlar yaratish (foydalanuvchilar, filiallar)
 pnpm db:seed
-```
 
-### 4. Backend Ishga Tushirish
-
-```bash
-cd apps/backend
+# Ishga tushirish
 pnpm dev
 ```
 
-Backend http://localhost:3001 da ishga tushadi.
+### 2. Brauzerda oching:
 
-API Dokumentatsiya: http://localhost:3001/api/docs
+- **Frontend:** http://localhost:3003
+- **Backend API:** http://localhost:3001
+- **API Docs:** http://localhost:3001/api/docs
 
-## 📧 Test Foydalanuvchilar
+### 3. Login qiling:
 
-Seed script quyidagi foydalanuvchilarni yaratadi:
+- **Email:** admin@soundz.uz
+- **Parol:** admin123
 
-- **Super Admin**: 
-  - Email: `admin@soundz.uz`
-  - Parol: `admin123`
+## Alohida Terminalda Ishga Tushirish
 
-- **Filial Rahbari**: 
-  - Email: `manager@soundz.uz`
-  - Parol: `manager123`
+Agar bir vaqtda ikkita terminal ochib ishga tushirmoqchi bo'lsangiz:
 
-- **Filial Xodimi**: 
-  - Email: `staff@soundz.uz`
-  - Parol: `staff123`
-
-## 🔍 Tekshirish
-
-### API Test
-
-Postman yoki browser'da:
-
-```bash
-# Health check
-curl http://localhost:3001/health
-
-# Login test
-curl -X POST http://localhost:3001/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"admin@soundz.uz","password":"admin123"}'
+**Terminal 1 (Backend):**
+```powershell
+cd C:\Users\AzzaPRO\Desktop\Soundz-crm\apps\backend
+pnpm dev
 ```
 
-### Prisma Studio
-
-Database ma'lumotlarini ko'rish:
-
-```bash
-pnpm db:studio
+**Terminal 2 (Frontend):**
+```powershell
+cd C:\Users\AzzaPRO\Desktop\Soundz-crm\apps\frontend
+pnpm dev
 ```
 
-Bu http://localhost:5555 da ochiladi.
+## Portlar
 
-## ⚠️ Muammo Tuzatish
+- Backend: **3001**
+- Frontend: **3003**
+- PostgreSQL: **5432**
 
-### Database ulanmayapti
+## Test Foydalanuvchilar
 
-1. PostgreSQL ishlayotganini tekshiring
-2. Parolni tekshiring (`Bismillah`)
-3. Database mavjudligini tekshiring:
-   ```sql
-   -- PostgreSQL'da
-   \l
-   -- yoki
-   SELECT datname FROM pg_database WHERE datname = 'crm_db';
-   ```
+| Email | Parol | Rol |
+|-------|-------|-----|
+| admin@soundz.uz | admin123 | Super Admin |
+| manager@soundz.uz | manager123 | Filial Rahbari |
+| staff@soundz.uz | staff123 | Filial Xodimi |
 
-### Port band
+## Muammolar?
 
-Agar 3001 port band bo'lsa, `.env` faylida `PORT` ni o'zgartiring.
-
-### Prisma xatolari
-
-```bash
-# Prisma client'ni qayta generate qiling
-pnpm db:generate
-
-# Migration'larni qayta ishga tushiring
-pnpm db:migrate
-```
-
-## 📝 Keyingi Qadamlar
-
-1. Frontend yaratish (Next.js)
-2. Admin panel yaratish (React)
-3. Integratsiyalar (Instagram, Facebook, Telegram)
-4. Maps integratsiyasi (Google, Yandex)
-
-
-
+1. **Backend ishlamayapti:** PostgreSQL ishlayotganini tekshiring
+2. **Frontend ishlamayapti:** Backend ishlayotganini tekshiring
+3. **Database xatosi:** `pnpm db:migrate` ni qayta ishga tushiring
