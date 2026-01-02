@@ -239,6 +239,213 @@ export class ReportsService {
       },
     };
   }
+
+  async getLeadsReport(currentUser: any, filters: any) {
+    let where: any = {};
+
+    if (currentUser.role !== 'SUPER_ADMIN' && currentUser.branchId) {
+      where.branchId = currentUser.branchId;
+    } else if (filters.branchId) {
+      where.branchId = filters.branchId;
+    }
+
+    if (filters.startDate && filters.endDate) {
+      where.createdAt = {
+        gte: new Date(filters.startDate),
+        lte: new Date(filters.endDate),
+      };
+    }
+
+    if (filters.source) {
+      where.source = filters.source;
+    }
+
+    const leads = await this.prisma.lead.findMany({
+      where,
+      include: {
+        contact: true,
+        assignee: true,
+        branch: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    // Group by source
+    const sourceStats = leads.reduce((acc, lead) => {
+      const source = lead.source;
+      acc[source] = (acc[source] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    // Group by status
+    const statusStats = leads.reduce((acc, lead) => {
+      const status = lead.status;
+      acc[status] = (acc[status] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    return {
+      total: leads.length,
+      leads,
+      sourceStats: Object.entries(sourceStats).map(([source, count]) => ({
+        source,
+        count,
+        percentage: leads.length > 0 ? (count / leads.length) * 100 : 0,
+      })),
+      statusStats: Object.entries(statusStats).map(([status, count]) => ({
+        status,
+        count,
+        percentage: leads.length > 0 ? (count / leads.length) * 100 : 0,
+      })),
+    };
+  }
+
+  async getDealsReport(currentUser: any, filters: any) {
+    let where: any = {};
+
+    if (currentUser.role !== 'SUPER_ADMIN' && currentUser.branchId) {
+      where.branchId = currentUser.branchId;
+    } else if (filters.branchId) {
+      where.branchId = filters.branchId;
+    }
+
+    if (filters.startDate && filters.endDate) {
+      where.createdAt = {
+        gte: new Date(filters.startDate),
+        lte: new Date(filters.endDate),
+      };
+    }
+
+    if (filters.stage) {
+      where.stage = filters.stage;
+    }
+
+    const deals = await this.prisma.deal.findMany({
+      where,
+      include: {
+        contact: true,
+        assignee: true,
+        branch: true,
+        lead: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    // Group by stage
+    const stageStats = deals.reduce((acc, deal) => {
+      const stage = deal.stage;
+      acc[stage] = (acc[stage] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    // Revenue stats
+    const totalRevenue = deals
+      .filter((d) => d.stage === 'CLOSED_WON')
+      .reduce((sum, deal) => sum + (deal.amount || 0), 0);
+
+    const averageDealValue =
+      deals.length > 0
+        ? deals.reduce((sum, deal) => sum + (deal.amount || 0), 0) / deals.length
+        : 0;
+
+    return {
+      total: deals.length,
+      deals,
+      stageStats: Object.entries(stageStats).map(([stage, count]) => ({
+        stage,
+        count,
+        percentage: deals.length > 0 ? (count / deals.length) * 100 : 0,
+      })),
+      revenue: {
+        total: totalRevenue,
+        average: averageDealValue,
+      },
+    };
+  }
+
+  async getPerformanceReport(currentUser: any, filters: any) {
+    let where: any = {};
+
+    if (currentUser.role !== 'SUPER_ADMIN' && currentUser.branchId) {
+      where.branchId = currentUser.branchId;
+    } else if (filters.branchId) {
+      where.branchId = filters.branchId;
+    }
+
+    if (filters.startDate && filters.endDate) {
+      where.createdAt = {
+        gte: new Date(filters.startDate),
+        lte: new Date(filters.endDate),
+      };
+    }
+
+    // Get users
+    const users = await this.prisma.user.findMany({
+      where: currentUser.role !== 'SUPER_ADMIN' && currentUser.branchId
+        ? { branchId: currentUser.branchId }
+        : filters.branchId
+        ? { branchId: filters.branchId }
+        : {},
+      include: {
+        branch: true,
+      },
+    });
+
+    // Get performance stats for each user
+    const performanceStats = await Promise.all(
+      users.map(async (user) => {
+        const userWhere = {
+          ...where,
+          assigneeId: user.id,
+        };
+
+        const [leadsCount, dealsCount, closedDealsCount, revenue] = await Promise.all([
+          this.prisma.lead.count({ where: userWhere }),
+          this.prisma.deal.count({ where: userWhere }),
+          this.prisma.deal.count({
+            where: {
+              ...userWhere,
+              stage: 'CLOSED_WON',
+            },
+          }),
+          this.prisma.deal.aggregate({
+            where: {
+              ...userWhere,
+              stage: 'CLOSED_WON',
+            },
+            _sum: {
+              amount: true,
+            },
+          }),
+        ]);
+
+        return {
+          user: {
+            id: user.id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            role: user.role,
+            branch: user.branch,
+          },
+          leads: leadsCount,
+          deals: dealsCount,
+          closedDeals: closedDealsCount,
+          revenue: revenue._sum.amount || 0,
+          conversionRate:
+            leadsCount > 0 ? (closedDealsCount / leadsCount) * 100 : 0,
+        };
+      }),
+    );
+
+    return {
+      performance: performanceStats.sort((a, b) => b.revenue - a.revenue),
+    };
+  }
 }
 
 
