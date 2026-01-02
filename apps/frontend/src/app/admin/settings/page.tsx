@@ -38,10 +38,29 @@ export default function AdminSettingsPage() {
   const { data: settings, isLoading } = useQuery({
     queryKey: ['settings'],
     queryFn: async () => {
-      const response = await api.get('/settings');
-      return response.data;
+      try {
+        const response = await api.get('/settings');
+        return response.data;
+      } catch (error: any) {
+        console.error('Settings endpoint xatosi:', error);
+        // Agar settings endpoint ishlamasa, default qiymatlarni qaytarish
+        return {
+          enabledPlatforms: [
+            'INSTAGRAM_COMMENT',
+            'INSTAGRAM_DM',
+            'FACEBOOK_COMMENT',
+            'FACEBOOK_MESSAGE',
+            'TELEGRAM',
+            'YOUTUBE_COMMENT',
+            'EMAIL',
+            'PHONE_CALL',
+            'INTERNAL_NOTE',
+          ],
+        };
+      }
     },
     enabled: !!user && user.role === 'SUPER_ADMIN',
+    retry: false,
   });
 
   const [enabledPlatforms, setEnabledPlatforms] = useState<string[]>([]);

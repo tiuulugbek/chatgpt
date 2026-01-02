@@ -54,10 +54,30 @@ export default function MessagesPage() {
   const { data: settings } = useQuery({
     queryKey: ['settings'],
     queryFn: async () => {
-      const response = await api.get('/settings');
-      return response.data;
+      try {
+        const response = await api.get('/settings');
+        return response.data;
+      } catch (error: any) {
+        // Agar settings endpoint ishlamasa, default qiymatlarni qaytarish
+        console.warn('Settings endpoint ishlamayapti, default qiymatlar ishlatilmoqda:', error);
+        return {
+          enabledPlatforms: [
+            'INSTAGRAM_COMMENT',
+            'INSTAGRAM_DM',
+            'FACEBOOK_COMMENT',
+            'FACEBOOK_MESSAGE',
+            'TELEGRAM',
+            'YOUTUBE_COMMENT',
+            'EMAIL',
+            'PHONE_CALL',
+            'INTERNAL_NOTE',
+          ],
+        };
+      }
     },
     enabled: !!user,
+    retry: false,
+    staleTime: 5 * 60 * 1000, // 5 daqiqa
   });
 
   const enabledPlatforms = settings?.enabledPlatforms || [];
