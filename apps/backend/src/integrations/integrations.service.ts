@@ -372,6 +372,72 @@ export class IntegrationsService {
       }
     }
 
+    // Google Maps sharhlarni olish
+    if (settings.googleMapsApiKey && settings.googlePlaceIds && settings.googlePlaceIds.length > 0) {
+      try {
+        for (const placeId of settings.googlePlaceIds) {
+          try {
+            const reviewsData = await this.googleMapsService.fetchReviews(
+              settings.googleMapsApiKey,
+              placeId,
+            );
+            for (const review of reviewsData.reviews) {
+              try {
+                await this.googleMapsService.saveReviewAsReview(
+                  review,
+                  placeId,
+                  defaultBranch.id,
+                );
+                results.googleMaps.success++;
+              } catch (error: any) {
+                this.logger.error('Save Google Maps review error:', error);
+                results.googleMaps.error++;
+              }
+            }
+          } catch (error: any) {
+            this.logger.error('Google Maps fetch reviews error:', error);
+            results.googleMaps.error++;
+          }
+        }
+      } catch (error: any) {
+        this.logger.error('Google Maps sync error:', error);
+        results.googleMaps.error++;
+      }
+    }
+
+    // Yandex Maps sharhlarni olish
+    if (settings.yandexApiKey && settings.yandexOrgIds && settings.yandexOrgIds.length > 0) {
+      try {
+        for (const orgId of settings.yandexOrgIds) {
+          try {
+            const reviews = await this.yandexMapsService.fetchReviews(
+              settings.yandexApiKey,
+              orgId,
+            );
+            for (const review of reviews) {
+              try {
+                await this.yandexMapsService.saveReviewAsReview(
+                  review,
+                  orgId,
+                  defaultBranch.id,
+                );
+                results.yandexMaps.success++;
+              } catch (error: any) {
+                this.logger.error('Save Yandex Maps review error:', error);
+                results.yandexMaps.error++;
+              }
+            }
+          } catch (error: any) {
+            this.logger.error('Yandex Maps fetch reviews error:', error);
+            results.yandexMaps.error++;
+          }
+        }
+      } catch (error: any) {
+        this.logger.error('Yandex Maps sync error:', error);
+        results.yandexMaps.error++;
+      }
+    }
+
     return results;
   }
 }
