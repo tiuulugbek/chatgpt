@@ -9,41 +9,44 @@ import { useAuth } from '@/hooks/useAuth';
 import { SimpleBarChart, SimpleLineChart } from '@/components/charts/SimpleChart';
 import Link from 'next/link';
 import { DealStage, LeadSource } from '@prisma/client';
-
-const dealStageLabels: Record<DealStage, string> = {
-  LEAD: 'Yangi',
-  CONTACTED: 'Aloqa',
-  PROPOSAL: 'Taklif',
-  NEGOTIATION: 'Muzokara',
-  CLOSED_WON: 'Yakunlangan',
-  CLOSED_LOST: 'Yutqazilgan',
-};
-
-const leadSourceLabels: Record<LeadSource, string> = {
-  WEBSITE: 'Veb-sayt',
-  INSTAGRAM: 'Instagram',
-  FACEBOOK: 'Facebook',
-  TELEGRAM: 'Telegram',
-  YOUTUBE: 'YouTube',
-  PHONE_CALL: 'Telefon',
-  EMAIL: 'Email',
-  REFERRAL: 'Tavsiya',
-  OTHER: 'Boshqa',
-};
-
-const leadSourceColors: Record<LeadSource, string> = {
-  WEBSITE: '#3F3091',
-  INSTAGRAM: '#E4405F',
-  FACEBOOK: '#1877F2',
-  TELEGRAM: '#0088CC',
-  YOUTUBE: '#FF0000',
-  PHONE_CALL: '#10B981',
-  EMAIL: '#6B7280',
-  REFERRAL: '#F59E0B',
-  OTHER: '#9CA3AF',
-};
+import { useTranslation } from '@/lib/translations';
 
 export default function DashboardPage() {
+  const { t } = useTranslation();
+  
+  const dealStageLabels: Record<DealStage, string> = {
+    LEAD: t('deals.stages.LEAD'),
+    CONTACTED: t('deals.stages.CONTACTED'),
+    PROPOSAL: t('deals.stages.PROPOSAL'),
+    NEGOTIATION: t('deals.stages.NEGOTIATION'),
+    CLOSED_WON: t('deals.stages.CLOSED_WON'),
+    CLOSED_LOST: t('deals.stages.CLOSED_LOST'),
+  };
+
+  const leadSourceLabels: Record<LeadSource, string> = {
+    WEBSITE: t('leads.sources.WEBSITE'),
+    INSTAGRAM: t('leads.sources.INSTAGRAM'),
+    FACEBOOK: t('leads.sources.FACEBOOK'),
+    TELEGRAM: t('leads.sources.TELEGRAM'),
+    YOUTUBE: t('leads.sources.YOUTUBE'),
+    PHONE_CALL: t('leads.sources.PHONE'),
+    EMAIL: t('leads.sources.EMAIL'),
+    REFERRAL: t('leads.sources.OTHER'),
+    OTHER: t('leads.sources.OTHER'),
+  };
+
+  const leadSourceColors: Record<LeadSource, string> = {
+    WEBSITE: '#3F3091',
+    INSTAGRAM: '#E4405F',
+    FACEBOOK: '#1877F2',
+    TELEGRAM: '#0088CC',
+    YOUTUBE: '#FF0000',
+    PHONE_CALL: '#10B981',
+    EMAIL: '#6B7280',
+    REFERRAL: '#F59E0B',
+    OTHER: '#9CA3AF',
+  };
+
   const router = useRouter();
   const { user, isLoading: authLoading } = useAuth();
   const [timeRange, setTimeRange] = useState<'week' | 'month' | 'year'>('month');
@@ -68,7 +71,7 @@ export default function DashboardPage() {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-64">
-          <div className="text-gray-500">Yuklanmoqda...</div>
+          <div className="text-gray-500">{t('common.loading')}</div>
         </div>
       </DashboardLayout>
     );
@@ -97,7 +100,7 @@ export default function DashboardPage() {
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+            <h1 className="text-3xl font-bold text-gray-900">{t('dashboard.title')}</h1>
             <p className="text-gray-600 mt-1">Xush kelibsiz, {user?.firstName}!</p>
           </div>
           <div className="flex gap-2">
@@ -109,7 +112,7 @@ export default function DashboardPage() {
                   : 'bg-white text-gray-700 hover:bg-gray-50'
               }`}
             >
-              Hafta
+              {t('dashboard.thisWeek')}
             </button>
             <button
               onClick={() => setTimeRange('month')}
@@ -119,7 +122,7 @@ export default function DashboardPage() {
                   : 'bg-white text-gray-700 hover:bg-gray-50'
               }`}
             >
-              Oy
+              {t('dashboard.thisMonth')}
             </button>
             <button
               onClick={() => setTimeRange('year')}
@@ -129,7 +132,7 @@ export default function DashboardPage() {
                   : 'bg-white text-gray-700 hover:bg-gray-50'
               }`}
             >
-              Yil
+              {t('dashboard.thisYear')}
             </button>
           </div>
         </div>
@@ -139,7 +142,7 @@ export default function DashboardPage() {
           <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg p-6 text-white">
             <div className="flex justify-between items-start mb-4">
               <div>
-                <p className="text-purple-100 text-sm mb-1">Jami Lidlar</p>
+                <p className="text-purple-100 text-sm mb-1">{t('dashboard.totalLeads')}</p>
                 <p className="text-4xl font-bold">{dashboardData?.leads || 0}</p>
               </div>
               <div className="bg-white bg-opacity-20 rounded-lg p-3">
@@ -171,7 +174,7 @@ export default function DashboardPage() {
           <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg p-6 text-white">
             <div className="flex justify-between items-start mb-4">
               <div>
-                <p className="text-orange-100 text-sm mb-1">Faol Bitimlar</p>
+                <p className="text-orange-100 text-sm mb-1">{t('dashboard.totalDeals')}</p>
                 <p className="text-4xl font-bold">{dashboardData?.deals || 0}</p>
               </div>
               <div className="bg-white bg-opacity-20 rounded-lg p-3">
@@ -203,7 +206,7 @@ export default function DashboardPage() {
           <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white">
             <div className="flex justify-between items-start mb-4">
               <div>
-                <p className="text-green-100 text-sm mb-1">Mijozlar</p>
+                <p className="text-green-100 text-sm mb-1">{t('dashboard.totalContacts')}</p>
                 <p className="text-4xl font-bold">{dashboardData?.contacts || 0}</p>
               </div>
               <div className="bg-white bg-opacity-20 rounded-lg p-3">
@@ -271,14 +274,14 @@ export default function DashboardPage() {
           <div className="lg:col-span-2 bg-white rounded-xl shadow-lg p-6">
             <div className="flex justify-between items-center mb-6">
               <div>
-                <h2 className="text-xl font-bold text-gray-900">Lidlar Statistikasi</h2>
+                <h2 className="text-xl font-bold text-gray-900">{t('dashboard.leadStats')}</h2>
                 <p className="text-sm text-gray-500">Haftalik ko'rsatkichlar</p>
               </div>
               <Link
                 href="/leads"
                 className="text-primary hover:text-opacity-80 text-sm font-medium"
               >
-                Barchasini ko'rish →
+                {t('common.all')} →
               </Link>
             </div>
             {dashboardData?.weeklyStats?.leads ? (
@@ -320,7 +323,7 @@ export default function DashboardPage() {
           {/* Bitimlar Vronkasi */}
           <div className="bg-white rounded-xl shadow-lg p-6">
             <div className="mb-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-2">Bitimlar Vronkasi</h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-2">{t('dashboard.dealFunnel')}</h2>
               <p className="text-sm text-gray-500">Joriy holat</p>
             </div>
             <div className="space-y-4">
@@ -368,7 +371,7 @@ export default function DashboardPage() {
           <div className="bg-white rounded-xl shadow-lg p-6">
             <div className="flex justify-between items-center mb-6">
               <div>
-                <h2 className="text-xl font-bold text-gray-900">Daromad Statistikasi</h2>
+                <h2 className="text-xl font-bold text-gray-900">{t('dashboard.revenueStats')}</h2>
                 <p className="text-sm text-gray-500">Haftalik daromad</p>
               </div>
             </div>
@@ -404,7 +407,7 @@ export default function DashboardPage() {
           {/* Manbalar Tahlili */}
           <div className="bg-white rounded-xl shadow-lg p-6">
             <div className="mb-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-2">Lidlar Manbalari</h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-2">{t('dashboard.leadSources')}</h2>
               <p className="text-sm text-gray-500">Qaysi kanaldan ko'proq lidlar kelmoqda</p>
             </div>
             <div className="space-y-4">
@@ -449,28 +452,28 @@ export default function DashboardPage() {
 
         {/* Quick Actions */}
         <div className="bg-white rounded-xl shadow-lg p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Tezkor Amallar</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-4">{t('dashboard.quickActions')}</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Link
               href="/leads/new"
               className="flex flex-col items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition"
             >
               <span className="text-3xl mb-2">➕</span>
-              <span className="text-sm font-medium text-gray-700">Yangi Lid</span>
+              <span className="text-sm font-medium text-gray-700">{t('dashboard.newLead')}</span>
             </Link>
             <Link
               href="/deals/new"
               className="flex flex-col items-center p-4 bg-orange-50 rounded-lg hover:bg-orange-100 transition"
             >
               <span className="text-3xl mb-2">💼</span>
-              <span className="text-sm font-medium text-gray-700">Yangi Bitim</span>
+              <span className="text-sm font-medium text-gray-700">{t('dashboard.newDeal')}</span>
             </Link>
             <Link
               href="/contacts/new"
               className="flex flex-col items-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition"
             >
               <span className="text-3xl mb-2">👤</span>
-              <span className="text-sm font-medium text-gray-700">Yangi Mijoz</span>
+              <span className="text-sm font-medium text-gray-700">{t('dashboard.newContact')}</span>
             </Link>
             <Link
               href="/messages"

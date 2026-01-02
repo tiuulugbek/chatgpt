@@ -4,34 +4,36 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { useTranslation } from '@/lib/translations';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
-// Asosiy menyu (barcha foydalanuvchilar uchun)
-const baseMenuItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: '📊', roles: ['SUPER_ADMIN', 'BRANCH_MANAGER', 'BRANCH_STAFF'] },
-  { href: '/leads', label: 'Lidlar', icon: '📋', roles: ['SUPER_ADMIN', 'BRANCH_MANAGER', 'BRANCH_STAFF'] },
-  { href: '/deals', label: 'Bitimlar', icon: '💼', roles: ['SUPER_ADMIN', 'BRANCH_MANAGER', 'BRANCH_STAFF'] },
-  { href: '/contacts', label: 'Mijozlar', icon: '👥', roles: ['SUPER_ADMIN', 'BRANCH_MANAGER', 'BRANCH_STAFF'] },
-  { href: '/messages', label: 'Xabarlar', icon: '💬', roles: ['SUPER_ADMIN', 'BRANCH_MANAGER', 'BRANCH_STAFF'] },
-  { href: '/reviews', label: 'Sharhlar', icon: '⭐', roles: ['SUPER_ADMIN', 'BRANCH_MANAGER', 'BRANCH_STAFF'] },
-  { href: '/reports', label: 'Hisobotlar', icon: '📈', roles: ['SUPER_ADMIN', 'BRANCH_MANAGER', 'BRANCH_STAFF'] },
-];
-
-// Admin menyu (faqat SUPER_ADMIN uchun)
-const adminMenuItems = [
-  { href: '/admin/users', label: 'Foydalanuvchilar', icon: '👤', roles: ['SUPER_ADMIN'] },
-  { href: '/admin/branches', label: 'Filiallar', icon: '🏢', roles: ['SUPER_ADMIN'] },
-  { href: '/admin/settings', label: 'Sozlamalar', icon: '⚙️', roles: ['SUPER_ADMIN'] },
-  { href: '/admin/integrations', label: 'Integratsiyalar', icon: '🔌', roles: ['SUPER_ADMIN'] },
-];
-
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { user, logout, isAdmin } = useAuth();
+  const { t } = useTranslation();
+
+  // Asosiy menyu (barcha foydalanuvchilar uchun)
+  const baseMenuItems = [
+    { href: '/dashboard', label: t('navigation.dashboard'), icon: '📊', roles: ['SUPER_ADMIN', 'BRANCH_MANAGER', 'BRANCH_STAFF'] },
+    { href: '/leads', label: t('navigation.leads'), icon: '📋', roles: ['SUPER_ADMIN', 'BRANCH_MANAGER', 'BRANCH_STAFF'] },
+    { href: '/deals', label: t('navigation.deals'), icon: '💼', roles: ['SUPER_ADMIN', 'BRANCH_MANAGER', 'BRANCH_STAFF'] },
+    { href: '/contacts', label: t('navigation.contacts'), icon: '👥', roles: ['SUPER_ADMIN', 'BRANCH_MANAGER', 'BRANCH_STAFF'] },
+    { href: '/messages', label: t('navigation.messages'), icon: '💬', roles: ['SUPER_ADMIN', 'BRANCH_MANAGER', 'BRANCH_STAFF'] },
+    { href: '/reviews', label: t('navigation.reviews'), icon: '⭐', roles: ['SUPER_ADMIN', 'BRANCH_MANAGER', 'BRANCH_STAFF'] },
+    { href: '/reports', label: t('navigation.reports'), icon: '📈', roles: ['SUPER_ADMIN', 'BRANCH_MANAGER', 'BRANCH_STAFF'] },
+  ];
+
+  // Admin menyu (faqat SUPER_ADMIN uchun)
+  const adminMenuItems = [
+    { href: '/admin/users', label: t('navigation.admin.users'), icon: '👤', roles: ['SUPER_ADMIN'] },
+    { href: '/admin/branches', label: t('navigation.admin.branches'), icon: '🏢', roles: ['SUPER_ADMIN'] },
+    { href: '/admin/settings', label: t('navigation.admin.settings'), icon: '⚙️', roles: ['SUPER_ADMIN'] },
+    { href: '/admin/integrations', label: t('navigation.admin.integrations'), icon: '🔌', roles: ['SUPER_ADMIN'] },
+  ];
 
   // Foydalanuvchi roliga qarab menyu filtrlash
   const getMenuItems = () => {
@@ -79,15 +81,15 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               </Link>
             ))}
           </nav>
-          <div className="mt-4 pt-4 border-t border-white border-opacity-20">
-            <button
-              onClick={logout}
-              className="w-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white py-3 px-4 rounded-lg transition-all font-medium flex items-center justify-center space-x-2"
-            >
-              <span>🚪</span>
-              <span>Chiqish</span>
-            </button>
-          </div>
+              <div className="mt-4 pt-4 border-t border-white border-opacity-20">
+                <button
+                  onClick={logout}
+                  className="w-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white py-3 px-4 rounded-lg transition-all font-medium flex items-center justify-center space-x-2"
+                >
+                  <span>🚪</span>
+                  <span>{t('navigation.logout')}</span>
+                </button>
+              </div>
         </div>
       </aside>
 

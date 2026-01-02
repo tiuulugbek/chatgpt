@@ -1,0 +1,268 @@
+{
+  "common": {
+    "loading": "Yuklanmoqda...",
+    "error": "Xatolik",
+    "save": "Saqlash",
+    "cancel": "Bekor qilish",
+    "delete": "O'chirish",
+    "edit": "Tahrirlash",
+    "create": "Yaratish",
+    "update": "Yangilash",
+    "search": "Qidiruv",
+    "filter": "Filtrlash",
+    "all": "Barchasi",
+    "yes": "Ha",
+    "no": "Yo'q",
+    "confirm": "Tasdiqlash",
+    "close": "Yopish",
+    "back": "Orqaga",
+    "next": "Keyingi",
+    "previous": "Oldingi",
+    "actions": "Amallar",
+    "status": "Holat",
+    "date": "Sana",
+    "name": "Ism",
+    "phone": "Telefon",
+    "email": "Email",
+    "address": "Manzil",
+    "notes": "Eslatmalar",
+    "createdAt": "Yaratilgan sana",
+    "updatedAt": "Yangilangan sana"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "quickActions": "Tezkor Amallar",
+    "revenueStats": "Daromad Statistikasi",
+    "leadSources": "Lidlar Manbalari",
+    "leadStats": "Lidlar Statistikasi",
+    "dealFunnel": "Bitimlar Vronkasi",
+    "newLead": "Yangi Lid",
+    "newDeal": "Yangi Bitim",
+    "newContact": "Yangi Mijoz",
+    "totalLeads": "Jami Lidlar",
+    "totalDeals": "Jami Bitimlar",
+    "totalContacts": "Jami Mijozlar",
+    "totalRevenue": "Jami Daromad",
+    "growth": "O'sish",
+    "thisWeek": "Bu hafta",
+    "thisMonth": "Bu oy",
+    "thisYear": "Bu yil",
+    "timeRange": "Vaqt oralig'i"
+  },
+  "leads": {
+    "title": "Lidlar",
+    "new": "Yangi Lid",
+    "edit": "Lidni tahrirlash",
+    "details": "Lid tafsilotlari",
+    "status": "Holat",
+    "source": "Manba",
+    "assignee": "Javobgar",
+    "branch": "Filial",
+    "value": "Qiymat",
+    "createdAt": "Yaratilgan sana",
+    "notes": "Eslatmalar",
+    "addNote": "Eslatma qo'shish",
+    "statuses": {
+      "NEW": "Yangi",
+      "CONTACTED": "Aloqa qilindi",
+      "QUALIFIED": "Sifatli",
+      "PROPOSAL_SENT": "Taklif yuborildi",
+      "NEGOTIATION": "Muzokara",
+      "WON": "Yutdi",
+      "LOST": "Yutqazdi",
+      "CLOSED": "Yopildi"
+    },
+    "sources": {
+      "WEBSITE": "Veb-sayt",
+      "INSTAGRAM": "Instagram",
+      "FACEBOOK": "Facebook",
+      "TELEGRAM": "Telegram",
+      "YOUTUBE": "YouTube",
+      "PHONE": "Telefon",
+      "EMAIL": "Email",
+      "GOOGLE_MAPS": "Google Maps",
+      "YANDEX_MAPS": "Yandex Maps",
+      "OTHER": "Boshqa"
+    }
+  },
+  "deals": {
+    "title": "Bitimlar",
+    "new": "Yangi Bitim",
+    "edit": "Bitimni tahrirlash",
+    "details": "Bitim tafsilotlari",
+    "stage": "Bosqich",
+    "value": "Qiymat",
+    "probability": "Ehtimollik",
+    "expectedCloseDate": "Kutilayotgan yopilish sanasi",
+    "stages": {
+      "LEAD": "Yangi",
+      "CONTACTED": "Aloqa",
+      "PROPOSAL": "Taklif",
+      "NEGOTIATION": "Muzokara",
+      "CLOSED_WON": "Yakunlangan",
+      "CLOSED_LOST": "Yutqazilgan"
+    }
+  },
+  "contacts": {
+    "title": "Mijozlar",
+    "new": "Yangi Mijoz",
+    "edit": "Mijozni tahrirlash",
+    "details": "Mijoz tafsilotlari",
+    "fullName": "To'liq ism",
+    "firstName": "Ism",
+    "lastName": "Familiya",
+    "phone": "Telefon",
+    "email": "Email",
+    "address": "Manzil",
+    "company": "Kompaniya",
+    "tin": "STIR",
+    "tags": "Teglar",
+    "history": "Aloqa tarixi",
+    "relatedLeads": "Bog'liq lidlar",
+    "relatedDeals": "Bog'liq bitimlar",
+    "relatedMessages": "Bog'liq xabarlar"
+  },
+  "messages": {
+    "title": "Xabarlar",
+    "reply": "Javob berish",
+    "markAsRead": "O'qilgan deb belgilash",
+    "markAsUnread": "O'qilmagan deb belgilash",
+    "platforms": {
+      "INSTAGRAM": "Instagram",
+      "FACEBOOK": "Facebook",
+      "TELEGRAM": "Telegram",
+      "YOUTUBE": "YouTube",
+      "WEBSITE": "Veb-sayt"
+    },
+    "types": {
+      "INSTAGRAM_COMMENT": "Instagram izohi",
+      "INSTAGRAM_DM": "Instagram DM",
+      "FACEBOOK_COMMENT": "Facebook izohi",
+      "FACEBOOK_MESSAGE": "Facebook xabari",
+      "TELEGRAM": "Telegram xabari",
+      "YOUTUBE_COMMENT": "YouTube izohi",
+      "WEBSITE_FORM": "Veb-sayt formasi"
+    },
+    "direction": {
+      "INBOUND": "Kiruvchi",
+      "OUTBOUND": "Chiquvchi"
+    }
+  },
+  "reviews": {
+    "title": "Sharhlar",
+    "respond": "Javob berish",
+    "rating": "Reyting",
+    "comment": "Sharh",
+    "author": "Muallif",
+    "platform": "Platforma",
+    "responded": "Javob berilgan",
+    "notResponded": "Javob berilmagan",
+    "platforms": {
+      "GOOGLE_MAPS": "Google Maps",
+      "YANDEX_MAPS": "Yandex Maps",
+      "TRIPADVISOR": "TripAdvisor",
+      "TWOGIS": "2GIS",
+      "OTHER": "Boshqa"
+    },
+    "statistics": {
+      "total": "Jami Sharhlar",
+      "averageRating": "O'rtacha Reyting",
+      "responded": "Javob Berilgan",
+      "notResponded": "Javob Berilmagan"
+    }
+  },
+  "reports": {
+    "title": "Hisobotlar",
+    "leads": "Lidlar hisoboti",
+    "deals": "Bitimlar hisoboti",
+    "userActivity": "Xodimlar faolligi",
+    "export": "Eksport qilish",
+    "filter": "Filtrlash",
+    "dateRange": "Sana oralig'i",
+    "branch": "Filial",
+    "source": "Manba",
+    "stage": "Bosqich"
+  },
+  "admin": {
+    "users": {
+      "title": "Foydalanuvchilar",
+      "new": "Yangi foydalanuvchi",
+      "edit": "Foydalanuvchini tahrirlash",
+      "role": "Rol",
+      "roles": {
+        "SUPER_ADMIN": "Tizim administratori",
+        "BRANCH_MANAGER": "Filial rahbari",
+        "BRANCH_STAFF": "Filial xodimi",
+        "MARKETING": "Marketing",
+        "SUPPORT": "Qo'llab-quvvatlash"
+      }
+    },
+    "branches": {
+      "title": "Filiallar",
+      "new": "Yangi filial",
+      "edit": "Filialni tahrirlash",
+      "name": "Nomi",
+      "code": "Kodi",
+      "address": "Manzil",
+      "phone": "Telefon",
+      "email": "Email",
+      "region": "Hudud",
+      "isActive": "Faol"
+    },
+    "settings": {
+      "title": "Sozlamalar",
+      "platforms": "Platformalar ko'rinishi",
+      "enabledPlatforms": "Faol platformalar"
+    },
+    "integrations": {
+      "title": "Integratsiyalar",
+      "configure": "Sozlash",
+      "test": "Test",
+      "sync": "Sinxronizatsiya qilish",
+      "syncAll": "Barchasini sinxronizatsiya qilish",
+      "enabled": "Faol",
+      "disabled": "Nofaol",
+      "platforms": {
+        "instagram": "Instagram",
+        "facebook": "Facebook",
+        "telegram": "Telegram",
+        "youtube": "YouTube",
+        "googleMaps": "Google Maps",
+        "yandexMaps": "Yandex Maps"
+      }
+    }
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "leads": "Lidlar",
+    "deals": "Bitimlar",
+    "contacts": "Mijozlar",
+    "messages": "Xabarlar",
+    "reviews": "Sharhlar",
+    "reports": "Hisobotlar",
+    "logout": "Chiqish",
+    "admin": {
+      "users": "Foydalanuvchilar",
+      "branches": "Filiallar",
+      "settings": "Sozlamalar",
+      "integrations": "Integratsiyalar"
+    }
+  },
+  "auth": {
+    "login": "Kirish",
+    "logout": "Chiqish",
+    "email": "Email",
+    "password": "Parol",
+    "rememberMe": "Eslab qolish",
+    "forgotPassword": "Parolni unutdingizmi?",
+    "invalidCredentials": "Noto'g'ri email yoki parol"
+  },
+  "telegram": {
+    "title": "Soundz CRM Mini-App",
+    "quickActions": "Tezkor Amallar",
+    "newLead": "Yangi Lid",
+    "newDeal": "Yangi Bitim",
+    "userInfo": "Foydalanuvchi ma'lumotlari"
+  }
+}
+
