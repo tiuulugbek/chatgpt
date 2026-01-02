@@ -82,5 +82,41 @@ Tizim to'liq o'zbek tilida ishlaydi.
 - Audit logging
 - Ma'lumotlarni shifrlash
 
+## 🚀 Production Deployment
+
+Production serverga yuklash uchun qo'llanmalar:
+
+- **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Batafsil deployment qo'llanmasi
+- **[QUICK_DEPLOY.md](./QUICK_DEPLOY.md)** - Tezkor deployment qo'llanmasi
+- **[deploy.sh](./deploy.sh)** - Avtomatik deployment script
+
+### Tezkor Boshlash
+
+```bash
+# Serverga kirish
+ssh user@your-server
+
+# Loyihani klonlash
+cd /var/www
+git clone https://github.com/tiuulugbek/chatgpt.git soundz-crm
+cd soundz-crm
+
+# Environment variables
+cp env.example .env
+nano .env  # Sozlamalarni o'zgartiring
+
+# O'rnatish va build
+pnpm install
+pnpm db:generate
+pnpm db:migrate
+pnpm build
+
+# PM2 bilan ishga tushirish
+pm2 start apps/backend/dist/main.js --name "soundz-crm-backend"
+pm2 start npm --name "soundz-crm-frontend" --cwd apps/frontend -- start
+pm2 save
+```
+
+Batafsil qo'llanma: [DEPLOYMENT.md](./DEPLOYMENT.md)
 
 
