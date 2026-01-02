@@ -21,7 +21,19 @@ api.interceptors.request.use(
     // Debug: So'rov URL'ni ko'rsatish
     if (typeof window !== 'undefined') {
       console.log('[API] So\'rov URL:', config.baseURL + config.url);
-      const token = localStorage.getItem('access_token');
+      
+      // Token olish - localStorage yoki cookie'dan
+      let token = localStorage.getItem('access_token');
+      
+      // Agar localStorage'da token yo'q bo'lsa, cookie'dan olishga harakat qilish
+      if (!token) {
+        const cookies = document.cookie.split(';');
+        const tokenCookie = cookies.find(c => c.trim().startsWith('access_token='));
+        if (tokenCookie) {
+          token = tokenCookie.split('=')[1];
+        }
+      }
+      
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }

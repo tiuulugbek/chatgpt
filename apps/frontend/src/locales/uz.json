@@ -31,18 +31,18 @@
   },
   "dashboard": {
     "title": "Dashboard",
-    "quickActions": "Tezkor Amallar",
-    "revenueStats": "Daromad Statistikasi",
-    "leadSources": "Lidlar Manbalari",
-    "leadStats": "Lidlar Statistikasi",
-    "dealFunnel": "Bitimlar Vronkasi",
-    "newLead": "Yangi Lid",
-    "newDeal": "Yangi Bitim",
-    "newContact": "Yangi Mijoz",
-    "totalLeads": "Jami Lidlar",
-    "totalDeals": "Jami Bitimlar",
-    "totalContacts": "Jami Mijozlar",
-    "totalRevenue": "Jami Daromad",
+    "quickActions": "Tezkor amallar",
+    "revenueStats": "Daromad statistikasi",
+    "leadSources": "Lidlar manbalari",
+    "leadStats": "Lidlar statistikasi",
+    "dealFunnel": "Bitimlar varonkasi",
+    "newLead": "Yangi lid",
+    "newDeal": "Yangi bitim",
+    "newContact": "Yangi mijoz",
+    "totalLeads": "Jami lidlar",
+    "totalDeals": "Jami bitimlar",
+    "totalContacts": "Jami mijozlar",
+    "totalRevenue": "Jami daromad",
     "growth": "O'sish",
     "thisWeek": "Bu hafta",
     "thisMonth": "Bu oy",
@@ -80,8 +80,8 @@
       "YOUTUBE": "YouTube",
       "PHONE": "Telefon",
       "EMAIL": "Email",
-      "GOOGLE_MAPS": "Google Maps",
-      "YANDEX_MAPS": "Yandex Maps",
+      "GOOGLE_MAPS": "Google maps",
+      "YANDEX_MAPS": "Yandex maps",
       "OTHER": "Boshqa"
     }
   },
@@ -165,10 +165,10 @@
       "OTHER": "Boshqa"
     },
     "statistics": {
-      "total": "Jami Sharhlar",
-      "averageRating": "O'rtacha Reyting",
-      "responded": "Javob Berilgan",
-      "notResponded": "Javob Berilmagan"
+      "total": "Jami sharhlar",
+      "averageRating": "O'rtacha reyting",
+      "responded": "Javob berilgan",
+      "notResponded": "Javob berilmagan"
     }
   },
   "reports": {
