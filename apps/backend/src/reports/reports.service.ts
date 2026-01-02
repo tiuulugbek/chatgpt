@@ -58,7 +58,14 @@ export class ReportsService {
       this.prisma.lead.count({ where: previousDateWhere }),
       this.prisma.deal.count({ where: previousDateWhere }),
       this.prisma.contact.count({ where: previousDateWhere }),
-      this.prisma.message.count({ where: { createdAt: previousDateWhere.createdAt } }),
+      this.prisma.message.count({
+        where: {
+          createdAt: {
+            gte: previousStartDate,
+            lt: startDate,
+          },
+        },
+      }),
     ]);
 
     // Calculate growth percentages
@@ -72,7 +79,7 @@ export class ReportsService {
       this.prisma.lead.count({ where }),
       this.prisma.deal.count({ where }),
       this.prisma.contact.count({ where }),
-      this.prisma.message.count({ where: { contact: where } }),
+      this.prisma.message.count({ where: {} }),
     ]);
 
     // Deal status breakdown
