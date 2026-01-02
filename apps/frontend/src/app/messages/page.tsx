@@ -20,23 +20,38 @@ const messageTypeConfig: Record<string, { label: string; icon: string; color: st
   INTERNAL_NOTE: { label: 'Ichki Izoh', icon: '📝', color: 'bg-yellow-100 text-yellow-800' },
 };
 
+// Platformalar guruhlari
+const platformTabs = [
+  { id: 'all', label: 'Barchasi', icon: '💬', types: [] },
+  { id: 'instagram', label: 'Instagram', icon: '📷', types: ['INSTAGRAM_COMMENT', 'INSTAGRAM_DM'] },
+  { id: 'facebook', label: 'Facebook', icon: '👥', types: ['FACEBOOK_COMMENT', 'FACEBOOK_MESSAGE'] },
+  { id: 'telegram', label: 'Telegram', icon: '✈️', types: ['TELEGRAM'] },
+  { id: 'youtube', label: 'YouTube', icon: '📺', types: ['YOUTUBE_COMMENT'] },
+  { id: 'email', label: 'Email', icon: '📧', types: ['EMAIL'] },
+  { id: 'phone', label: 'Telefon', icon: '📞', types: ['PHONE_CALL'] },
+  { id: 'internal', label: 'Ichki Izohlar', icon: '📝', types: ['INTERNAL_NOTE'] },
+];
+
 export default function MessagesPage() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  const [typeFilter, setTypeFilter] = useState<string>('all');
+  const [activeTab, setActiveTab] = useState<string>('all');
   const [directionFilter, setDirectionFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedMessage, setSelectedMessage] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState<string>('');
 
+  // Faol tab uchun type filtrlari
+  const activeTabConfig = platformTabs.find((tab) => tab.id === activeTab);
+  const typeFilters = activeTabConfig?.types || [];
+
   // API so'rov parametrlari
   const queryParams = new URLSearchParams();
-  if (typeFilter !== 'all') queryParams.append('type', typeFilter);
   if (directionFilter !== 'all') queryParams.append('direction', directionFilter);
 
   const { data: messages, isLoading } = useQuery({
-    queryKey: ['messages', typeFilter, directionFilter],
+    queryKey: ['messages', directionFilter],
     queryFn: async () => {
       const response = await api.get(`/messages?${queryParams.toString()}`);
       return response.data;
@@ -68,19 +83,36 @@ export default function MessagesPage() {
     },
   });
 
-  // Qidiruv natijalarini filtrlash
+  // Tab va qidiruv bo'yicha filtrlash
   const filteredMessages = messages?.filter((message: any) => {
-    if (!searchQuery) return true;
-    const query = searchQuery.toLowerCase();
-    return (
-      message.content?.toLowerCase().includes(query) ||
-      message.contact?.fullName?.toLowerCase().includes(query) ||
-      message.contact?.phone?.includes(query)
-    );
+    // Tab filtri
+    if (activeTab !== 'all' && !typeFilters.includes(message.type)) {
+      return false;
+    }
+
+    // Qidiruv filtri
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      return (
+        message.content?.toLowerCase().includes(query) ||
+        message.contact?.fullName?.toLowerCase().includes(query) ||
+        message.contact?.phone?.includes(query)
+      );
+    }
+
+    return true;
   }) || [];
 
-  // O'qilmagan xabarlar soni
-  const unreadCount = filteredMessages.filter((m: any) => !m.isRead).length;
+  // Har bir tab uchun o'qilmagan xabarlar soni
+  const getUnreadCount = (tabId: string) => {
+    const tabConfig = platformTabs.find((tab) => tab.id === tabId);
+    const tabTypes = tabConfig?.types || [];
+    
+    return messages?.filter((m: any) => {
+      if (tabId !== 'all' && !tabTypes.includes(m.type)) return false;
+      return !m.isRead;
+    }).length || 0;
+  };
 
   const handleReply = (message: any) => {
     if (!replyContent.trim()) return;
@@ -103,18 +135,48 @@ export default function MessagesPage() {
             <h1 className="text-3xl font-bold text-gray-900">Xabarlar</h1>
             <p className="text-gray-600 mt-1">
               Barcha kanallardan kelgan xabarlar
-              {unreadCount > 0 && (
+              {getUnreadCount('all') > 0 && (
                 <span className="ml-2 px-2 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium">
-                  {unreadCount} o'qilmagan
+                  {getUnreadCount('all')} o'qilmagan
                 </span>
               )}
             </p>
           </div>
         </div>
 
+        {/* Platforma Tab'lar */}
+        <div className="bg-white rounded-lg shadow">
+          <div className="border-b border-gray-200">
+            <nav className="flex overflow-x-auto -mb-px">
+              {platformTabs.map((tab) => {
+                const unreadCount = getUnreadCount(tab.id);
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex items-center gap-2 px-6 py-4 border-b-2 font-medium text-sm whitespace-nowrap transition ${
+                      activeTab === tab.id
+                        ? 'border-primary text-primary'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    <span className="text-lg">{tab.icon}</span>
+                    <span>{tab.label}</span>
+                    {unreadCount > 0 && (
+                      <span className="px-2 py-0.5 bg-red-100 text-red-800 rounded-full text-xs font-semibold">
+                        {unreadCount}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+        </div>
+
         {/* Filtrlash va qidiruv */}
         <div className="bg-white rounded-lg shadow p-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Qidiruv */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -127,25 +189,6 @@ export default function MessagesPage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               />
-            </div>
-
-            {/* Type filtri */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Platforma
-              </label>
-              <select
-                value={typeFilter}
-                onChange={(e) => setTypeFilter(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                <option value="all">Barchasi</option>
-                {Object.entries(messageTypeConfig).map(([value, config]) => (
-                  <option key={value} value={value}>
-                    {config.icon} {config.label}
-                  </option>
-                ))}
-              </select>
             </div>
 
             {/* Direction filtri */}
@@ -175,10 +218,14 @@ export default function MessagesPage() {
           <div className="bg-white rounded-lg shadow p-12 text-center">
             <div className="text-6xl mb-4">💬</div>
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              Hozircha xabarlar mavjud emas
+              {activeTab === 'all'
+                ? 'Hozircha xabarlar mavjud emas'
+                : `${platformTabs.find((t) => t.id === activeTab)?.label} bo'yicha xabarlar topilmadi`}
             </h3>
             <p className="text-gray-600">
-              Ijtimoiy tarmoqlar integratsiyasi sozlangandan keyin xabarlar shu yerda ko'rinadi
+              {activeTab === 'all'
+                ? 'Ijtimoiy tarmoqlar integratsiyasi sozlangandan keyin xabarlar shu yerda ko\'rinadi'
+                : 'Bu platformadan hozircha xabarlar kelmagan'}
             </p>
           </div>
         ) : (
@@ -259,6 +306,17 @@ export default function MessagesPage() {
                             Lidni ko'rish →
                           </Link>
                         )}
+                        {message.platformUrl && (
+                          <a
+                            href={message.platformUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:text-opacity-80"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            Platformada ko'rish →
+                          </a>
+                        )}
                       </div>
                     )}
                   </div>
@@ -325,7 +383,9 @@ export default function MessagesPage() {
             </div>
             <div className="bg-white rounded-lg shadow p-6">
               <div className="text-sm text-gray-500 mb-1">O'qilmagan</div>
-              <div className="text-3xl font-bold text-red-600">{unreadCount}</div>
+              <div className="text-3xl font-bold text-red-600">
+                {filteredMessages.filter((m: any) => !m.isRead).length}
+              </div>
             </div>
             <div className="bg-white rounded-lg shadow p-6">
               <div className="text-sm text-gray-500 mb-1">Kelgan</div>
