@@ -50,6 +50,24 @@ export default function MessagesPage() {
   const queryParams = new URLSearchParams();
   if (directionFilter !== 'all') queryParams.append('direction', directionFilter);
 
+  // Sozlamalarni olish (yoqilgan platformalar)
+  const { data: settings } = useQuery({
+    queryKey: ['settings'],
+    queryFn: async () => {
+      const response = await api.get('/settings');
+      return response.data;
+    },
+    enabled: !!user,
+  });
+
+  const enabledPlatforms = settings?.enabledPlatforms || [];
+
+  // Faqat yoqilgan platformalar uchun tab'lar
+  const visibleTabs = platformTabs.filter((tab) => {
+    if (tab.id === 'all') return true;
+    return tab.types.some((type) => enabledPlatforms.includes(type));
+  });
+
   const { data: messages, isLoading } = useQuery({
     queryKey: ['messages', directionFilter],
     queryFn: async () => {
@@ -109,6 +127,8 @@ export default function MessagesPage() {
     const tabTypes = tabConfig?.types || [];
     
     return messages?.filter((m: any) => {
+      // Faqat yoqilgan platformalarni hisoblash
+      if (!enabledPlatforms.includes(m.type)) return false;
       if (tabId !== 'all' && !tabTypes.includes(m.type)) return false;
       return !m.isRead;
     }).length || 0;
@@ -148,7 +168,7 @@ export default function MessagesPage() {
         <div className="bg-white rounded-lg shadow">
           <div className="border-b border-gray-200">
             <nav className="flex overflow-x-auto -mb-px">
-              {platformTabs.map((tab) => {
+              {visibleTabs.map((tab) => {
                 const unreadCount = getUnreadCount(tab.id);
                 return (
                   <button

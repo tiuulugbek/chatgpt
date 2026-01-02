@@ -407,6 +407,9 @@ model Settings {
   autoAssignEnabled      Boolean @default(false)
   notificationEnabled    Boolean @default(true)
   
+  // Platformalar ko'rinishi sozlamalari (Messages tab'lar uchun)
+  enabledPlatforms       String[] @default(["INSTAGRAM_COMMENT", "INSTAGRAM_DM", "FACEBOOK_COMMENT", "FACEBOOK_MESSAGE", "TELEGRAM", "YOUTUBE_COMMENT", "EMAIL", "PHONE_CALL", "INTERNAL_NOTE"])
+  
   updatedAt               DateTime @updatedAt
 }
 
