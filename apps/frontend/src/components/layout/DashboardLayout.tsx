@@ -16,6 +16,7 @@ const baseMenuItems = [
   { href: '/deals', label: 'Bitimlar', icon: '💼', roles: ['SUPER_ADMIN', 'BRANCH_MANAGER', 'BRANCH_STAFF'] },
   { href: '/contacts', label: 'Mijozlar', icon: '👥', roles: ['SUPER_ADMIN', 'BRANCH_MANAGER', 'BRANCH_STAFF'] },
   { href: '/messages', label: 'Xabarlar', icon: '💬', roles: ['SUPER_ADMIN', 'BRANCH_MANAGER', 'BRANCH_STAFF'] },
+  { href: '/reviews', label: 'Sharhlar', icon: '⭐', roles: ['SUPER_ADMIN', 'BRANCH_MANAGER', 'BRANCH_STAFF'] },
   { href: '/reports', label: 'Hisobotlar', icon: '📈', roles: ['SUPER_ADMIN', 'BRANCH_MANAGER', 'BRANCH_STAFF'] },
 ];
 
