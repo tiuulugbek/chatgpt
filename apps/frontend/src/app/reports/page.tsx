@@ -14,9 +14,10 @@ const leadSourceLabels: Record<LeadSource, string> = {
   FACEBOOK: 'Facebook',
   TELEGRAM: 'Telegram',
   YOUTUBE: 'YouTube',
-  PHONE_CALL: 'Telefon',
+  PHONE: 'Telefon',
   EMAIL: 'Email',
-  REFERRAL: 'Tavsiya',
+  GOOGLE_MAPS: 'Google Maps',
+  YANDEX_MAPS: 'Yandex Maps',
   OTHER: 'Boshqa',
 };
 

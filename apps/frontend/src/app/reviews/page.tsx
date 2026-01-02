@@ -196,7 +196,7 @@ export default function ReviewsPage() {
                 <option value="all">Barchasi</option>
                 {Object.values(ReviewPlatform).map((platform) => (
                   <option key={platform} value={platform}>
-                    {platformConfig[platform].label}
+                    {platformConfig[platform as ReviewPlatform].label}
                   </option>
                 ))}
               </select>
@@ -252,11 +252,11 @@ export default function ReviewsPage() {
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center space-x-2">
-                        <span className="text-xl">{platformConfig[review.platform]?.icon || '📝'}</span>
+                        <span className="text-xl">{platformConfig[review.platform as ReviewPlatform]?.icon || '📝'}</span>
                         <div>
                           <p className="font-medium text-gray-900">{review.authorName || 'Noma\'lum'}</p>
                           <p className="text-xs text-gray-500">
-                            {platformConfig[review.platform]?.label || review.platform}
+                            {platformConfig[review.platform as ReviewPlatform]?.label || review.platform}
                             {review.branch && ` • ${review.branch.name}`}
                           </p>
                         </div>
@@ -343,11 +343,11 @@ function ReviewDetails({
       <div>
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center space-x-2">
-            <span className="text-2xl">{platformConfig[review.platform]?.icon || '📝'}</span>
+            <span className="text-2xl">{platformConfig[review.platform as ReviewPlatform]?.icon || '📝'}</span>
             <div>
               <h3 className="font-semibold text-gray-900">{review.authorName || 'Noma\'lum'}</h3>
               <p className="text-xs text-gray-500">
-                {platformConfig[review.platform]?.label || review.platform}
+                {platformConfig[review.platform as ReviewPlatform]?.label || review.platform}
               </p>
             </div>
           </div>

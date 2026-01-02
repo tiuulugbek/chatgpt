@@ -29,9 +29,10 @@ export default function DashboardPage() {
     FACEBOOK: t('leads.sources.FACEBOOK'),
     TELEGRAM: t('leads.sources.TELEGRAM'),
     YOUTUBE: t('leads.sources.YOUTUBE'),
-    PHONE_CALL: t('leads.sources.PHONE'),
+    PHONE: t('leads.sources.PHONE'),
     EMAIL: t('leads.sources.EMAIL'),
-    REFERRAL: t('leads.sources.OTHER'),
+    GOOGLE_MAPS: t('leads.sources.GOOGLE_MAPS'),
+    YANDEX_MAPS: t('leads.sources.YANDEX_MAPS'),
     OTHER: t('leads.sources.OTHER'),
   };
 
@@ -41,9 +42,10 @@ export default function DashboardPage() {
     FACEBOOK: '#1877F2',
     TELEGRAM: '#0088CC',
     YOUTUBE: '#FF0000',
-    PHONE_CALL: '#10B981',
+    PHONE: '#10B981',
     EMAIL: '#6B7280',
-    REFERRAL: '#F59E0B',
+    GOOGLE_MAPS: '#4285F4',
+    YANDEX_MAPS: '#FC3F1D',
     OTHER: '#9CA3AF',
   };
 

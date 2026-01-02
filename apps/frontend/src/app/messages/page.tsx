@@ -16,7 +16,7 @@ const messageTypeConfig: Record<string, { label: string; icon: string; color: st
   TELEGRAM: { label: 'Telegram', icon: '✈️', color: 'bg-blue-100 text-blue-800' },
   YOUTUBE_COMMENT: { label: 'YouTube Izoh', icon: '📺', color: 'bg-red-100 text-red-800' },
   EMAIL: { label: 'Email', icon: '📧', color: 'bg-gray-100 text-gray-800' },
-  PHONE_CALL: { label: 'Telefon Qo\'ng\'iroq', icon: '📞', color: 'bg-green-100 text-green-800' },
+  PHONE: { label: 'Telefon Qo\'ng\'iroq', icon: '📞', color: 'bg-green-100 text-green-800' },
   INTERNAL_NOTE: { label: 'Ichki Izoh', icon: '📝', color: 'bg-yellow-100 text-yellow-800' },
 };
 
@@ -28,7 +28,7 @@ const platformTabs = [
   { id: 'telegram', label: 'Telegram', icon: '✈️', types: ['TELEGRAM'] },
   { id: 'youtube', label: 'YouTube', icon: '📺', types: ['YOUTUBE_COMMENT'] },
   { id: 'email', label: 'Email', icon: '📧', types: ['EMAIL'] },
-  { id: 'phone', label: 'Telefon', icon: '📞', types: ['PHONE_CALL'] },
+  { id: 'phone', label: 'Telefon', icon: '📞', types: ['PHONE'] },
   { id: 'internal', label: 'Ichki Izohlar', icon: '📝', types: ['INTERNAL_NOTE'] },
 ];
 
@@ -69,7 +69,7 @@ export default function MessagesPage() {
             'TELEGRAM',
             'YOUTUBE_COMMENT',
             'EMAIL',
-            'PHONE_CALL',
+            'PHONE',
             'INTERNAL_NOTE',
           ],
         };

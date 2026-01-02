@@ -39,6 +39,7 @@ model Branch {
   deals       Deal[]
   contacts    Contact[]
   reviews     Review[]
+  messages    Message[]
 
   @@index([code])
   @@index([region])
@@ -299,8 +300,13 @@ model Message {
   userId      String?
   user        User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
 
+  // Filial bilan aloqa
+  branchId    String?
+  branch      Branch?         @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
   @@index([contactId])
   @@index([leadId])
+  @@index([branchId])
   @@index([type])
   @@index([createdAt])
   @@index([isRead])

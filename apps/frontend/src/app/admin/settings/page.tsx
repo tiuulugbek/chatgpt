@@ -16,7 +16,7 @@ const allPlatforms = [
   { id: 'TELEGRAM', label: 'Telegram', icon: '✈️', group: 'telegram' },
   { id: 'YOUTUBE_COMMENT', label: 'YouTube Izoh', icon: '📺', group: 'youtube' },
   { id: 'EMAIL', label: 'Email', icon: '📧', group: 'email' },
-  { id: 'PHONE_CALL', label: 'Telefon Qo\'ng\'iroq', icon: '📞', group: 'phone' },
+  { id: 'PHONE', label: 'Telefon Qo\'ng\'iroq', icon: '📞', group: 'phone' },
   { id: 'INTERNAL_NOTE', label: 'Ichki Izoh', icon: '📝', group: 'internal' },
 ];
 
@@ -27,7 +27,7 @@ const platformGroups = [
   { id: 'telegram', label: 'Telegram', platforms: ['TELEGRAM'] },
   { id: 'youtube', label: 'YouTube', platforms: ['YOUTUBE_COMMENT'] },
   { id: 'email', label: 'Email', platforms: ['EMAIL'] },
-  { id: 'phone', label: 'Telefon', platforms: ['PHONE_CALL'] },
+  { id: 'phone', label: 'Telefon', platforms: ['PHONE'] },
   { id: 'internal', label: 'Ichki Izohlar', platforms: ['INTERNAL_NOTE'] },
 ];
 
@@ -53,7 +53,7 @@ export default function AdminSettingsPage() {
             'TELEGRAM',
             'YOUTUBE_COMMENT',
             'EMAIL',
-            'PHONE_CALL',
+            'PHONE',
             'INTERNAL_NOTE',
           ],
         };
@@ -79,7 +79,7 @@ export default function AdminSettingsPage() {
         'TELEGRAM',
         'YOUTUBE_COMMENT',
         'EMAIL',
-        'PHONE_CALL',
+        'PHONE',
         'INTERNAL_NOTE',
       ]);
     }

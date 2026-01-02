@@ -276,6 +276,8 @@ export class IntegrationsService {
       facebook: { success: 0, error: 0 },
       telegram: { success: 0, error: 0 },
       youtube: { success: 0, error: 0 },
+      googleMaps: { success: 0, error: 0 },
+      yandexMaps: { success: 0, error: 0 },
     };
 
     // Instagram izohlarni olish

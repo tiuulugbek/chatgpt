@@ -189,12 +189,12 @@ export class ReportsService {
           const dealDate = new Date(deal.createdAt);
           return dealDate >= dayStart && dealDate <= dayEnd;
         })
-        .reduce((sum, deal) => sum + (deal.amount || 0), 0);
+        .reduce((sum, deal) => sum + Number(deal.amount || 0), 0);
       
       weeklyRevenueData.push(dayRevenue);
     }
 
-    const totalRevenue = revenueDeals.reduce((sum, deal) => sum + (deal.amount || 0), 0);
+    const totalRevenue = revenueDeals.reduce((sum, deal) => sum + Number(deal.amount || 0), 0);
     const averageRevenue = weeklyRevenueData.length > 0
       ? weeklyRevenueData.reduce((sum, val) => sum + val, 0) / weeklyRevenueData.length
       : 0;
@@ -345,11 +345,11 @@ export class ReportsService {
     // Revenue stats
     const totalRevenue = deals
       .filter((d) => d.stage === 'CLOSED_WON')
-      .reduce((sum, deal) => sum + (deal.amount || 0), 0);
+      .reduce((sum, deal) => sum + Number(deal.amount || 0), 0);
 
     const averageDealValue =
       deals.length > 0
-        ? deals.reduce((sum, deal) => sum + (deal.amount || 0), 0) / deals.length
+        ? deals.reduce((sum, deal) => sum + Number(deal.amount || 0), 0) / deals.length
         : 0;
 
     return {
@@ -443,7 +443,7 @@ export class ReportsService {
     );
 
     return {
-      performance: performanceStats.sort((a, b) => b.revenue - a.revenue),
+      performance: performanceStats.sort((a, b) => Number(b.revenue) - Number(a.revenue)),
     };
   }
 }
