@@ -1,48 +1,35 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
 import Link from 'next/link';
 
-export default function ContactDetailPage() {
+interface ContactDetailsPageProps {
+  params: {
+    id: string;
+  };
+}
+
+export default function ContactDetailsPage({ params }: ContactDetailsPageProps) {
+  const { id } = params;
   const router = useRouter();
-  const params = useParams();
-  const { user } = useAuth();
   const queryClient = useQueryClient();
-  const contactId = params.id as string;
+  const { user, isLoading: authLoading } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<'info' | 'leads' | 'deals' | 'messages'>('info');
-  const [isEditing, setIsEditing] = useState(false);
-  const [editData, setEditData] = useState<any>({});
-
-  // Contact ma'lumotlarini olish
-  const { data: contact, isLoading } = useQuery({
-    queryKey: ['contact', contactId],
+  const { data: contact, isLoading: contactLoading } = useQuery({
+    queryKey: ['contact', id],
     queryFn: async () => {
-      const response = await api.get(`/contacts/${contactId}`);
+      const response = await api.get(`/contacts/${id}`);
       return response.data;
     },
-    enabled: !!contactId,
+    enabled: !!user && !!id,
   });
 
-  // Contact yangilash
-  const updateMutation = useMutation({
-    mutationFn: async (data: any) => {
-      const response = await api.patch(`/contacts/${contactId}`, data);
-      return response.data;
-    },
-    onSuccess: () => {
-      setIsEditing(false);
-      queryClient.invalidateQueries({ queryKey: ['contact', contactId] });
-      queryClient.invalidateQueries({ queryKey: ['contacts'] });
-    },
-  });
-
-  if (isLoading) {
+  if (authLoading || contactLoading) {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-64">
@@ -52,279 +39,120 @@ export default function ContactDetailPage() {
     );
   }
 
-  if (!contact) {
+  if (!user || !contact) {
     return (
       <DashboardLayout>
-        <div className="text-center py-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Mijoz topilmadi</h2>
-          <button
-            onClick={() => router.push('/contacts')}
-            className="text-primary hover:text-opacity-80"
-          >
-            Mijozlar ro'yxatiga qaytish
-          </button>
+        <div className="text-center py-8 text-gray-500">
+          Mijoz topilmadi yoki sizda huquq yo'q.
         </div>
       </DashboardLayout>
     );
   }
 
-  const handleSaveEdit = () => {
-    updateMutation.mutate(editData);
-  };
-
   return (
     <DashboardLayout>
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className="space-y-6">
         {/* Header */}
-        <div className="flex justify-between items-start">
+        <div className="flex justify-between items-center">
           <div>
-            <button
-              onClick={() => router.back()}
-              className="text-gray-600 hover:text-gray-900 mb-4"
+            <Link
+              href="/contacts"
+              className="text-primary hover:text-opacity-80 text-sm mb-2 inline-block"
             >
-              ← Orqaga
-            </button>
+              ← Mijozlar ro'yxatiga qaytish
+            </Link>
             <h1 className="text-3xl font-bold text-gray-900">{contact.fullName}</h1>
             {contact.company && (
               <p className="text-gray-600 mt-1">{contact.company}</p>
             )}
           </div>
-          {!isEditing && (
-            <button
-              onClick={() => {
-                setIsEditing(true);
-                setEditData({
-                  fullName: contact.fullName,
-                  phone: contact.phone || '',
-                  email: contact.email || '',
-                  address: contact.address || '',
-                  company: contact.company || '',
-                  tin: contact.tin || '',
-                  notes: contact.notes || '',
-                  tags: contact.tags?.join(', ') || '',
-                });
-              }}
-              className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90"
-            >
-              Tahrirlash
-            </button>
-          )}
         </div>
 
-        {/* Tabs */}
-        <div className="border-b border-gray-200">
-          <nav className="-mb-px flex space-x-8">
-            {[
-              { id: 'info', label: 'Ma\'lumotlar' },
-              { id: 'leads', label: `Lidlar (${contact.leads?.length || 0})` },
-              { id: 'deals', label: `Bitimlar (${contact.deals?.length || 0})` },
-              { id: 'messages', label: `Xabarlar (${contact.messages?.length || 0})` },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === tab.id
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </nav>
-        </div>
-
-        {/* Tab Content */}
-        <div className="bg-white rounded-lg shadow p-6">
-          {/* Ma'lumotlar */}
-          {activeTab === 'info' && (
-            <div className="space-y-6">
-              {isEditing ? (
-                <div className="space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Main Info */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Contact Information */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Aloqa Ma'lumotlari</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {contact.phone && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      F.I.Sh.
-                    </label>
-                    <input
-                      type="text"
-                      value={editData.fullName}
-                      onChange={(e) => setEditData({ ...editData, fullName: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Telefon
-                      </label>
-                      <input
-                        type="tel"
-                        value={editData.phone}
-                        onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Email
-                      </label>
-                      <input
-                        type="email"
-                        value={editData.email}
-                        onChange={(e) => setEditData({ ...editData, email: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Manzil
-                    </label>
-                    <input
-                      type="text"
-                      value={editData.address}
-                      onChange={(e) => setEditData({ ...editData, address: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Kompaniya
-                      </label>
-                      <input
-                        type="text"
-                        value={editData.company}
-                        onChange={(e) => setEditData({ ...editData, company: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        STIR
-                      </label>
-                      <input
-                        type="text"
-                        value={editData.tin}
-                        onChange={(e) => setEditData({ ...editData, tin: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Izohlar
-                    </label>
-                    <textarea
-                      value={editData.notes}
-                      onChange={(e) => setEditData({ ...editData, notes: e.target.value })}
-                      rows={4}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={handleSaveEdit}
-                      className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90"
+                    <p className="text-sm text-gray-500 mb-1">Telefon</p>
+                    <a
+                      href={`tel:${contact.phone}`}
+                      className="text-lg font-medium text-primary hover:text-opacity-80"
                     >
-                      Saqlash
-                    </button>
-                    <button
-                      onClick={() => setIsEditing(false)}
-                      className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                      {contact.phone}
+                    </a>
+                  </div>
+                )}
+                {contact.email && (
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">Email</p>
+                    <a
+                      href={`mailto:${contact.email}`}
+                      className="text-lg font-medium text-primary hover:text-opacity-80"
                     >
-                      Bekor qilish
-                    </button>
+                      {contact.email}
+                    </a>
                   </div>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                )}
+                {contact.address && (
+                  <div className="md:col-span-2">
+                    <p className="text-sm text-gray-500 mb-1">Manzil</p>
+                    <p className="text-gray-900">{contact.address}</p>
+                  </div>
+                )}
+                {contact.company && (
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500 mb-4">Kontakt ma'lumotlari</h3>
-                    <div className="space-y-3">
-                      <div>
-                        <div className="text-sm text-gray-500">Telefon</div>
-                        <div className="font-medium text-gray-900">
-                          {contact.phone || '-'}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Email</div>
-                        <div className="font-medium text-gray-900">
-                          {contact.email || '-'}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Manzil</div>
-                        <div className="font-medium text-gray-900">
-                          {contact.address || '-'}
-                        </div>
-                      </div>
-                    </div>
+                    <p className="text-sm text-gray-500 mb-1">Kompaniya</p>
+                    <p className="text-gray-900">{contact.company}</p>
                   </div>
+                )}
+                {contact.tin && (
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500 mb-4">Kompaniya ma'lumotlari</h3>
-                    <div className="space-y-3">
-                      <div>
-                        <div className="text-sm text-gray-500">Kompaniya</div>
-                        <div className="font-medium text-gray-900">
-                          {contact.company || '-'}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">STIR</div>
-                        <div className="font-medium text-gray-900">
-                          {contact.tin || '-'}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Filial</div>
-                        <div className="font-medium text-gray-900">
-                          {contact.branch?.name || '-'}
-                        </div>
-                      </div>
-                    </div>
+                    <p className="text-sm text-gray-500 mb-1">INN/STIR</p>
+                    <p className="text-gray-900">{contact.tin}</p>
                   </div>
-                  {contact.notes && (
-                    <div className="md:col-span-2">
-                      <h3 className="text-sm font-medium text-gray-500 mb-2">Izohlar</h3>
-                      <p className="text-gray-700 whitespace-pre-wrap">{contact.notes}</p>
-                    </div>
-                  )}
-                  {contact.tags && contact.tags.length > 0 && (
-                    <div className="md:col-span-2">
-                      <h3 className="text-sm font-medium text-gray-500 mb-2">Teglar</h3>
-                      <div className="flex flex-wrap gap-2">
-                        {contact.tags.map((tag: string, index: number) => (
-                          <span
-                            key={index}
-                            className="px-3 py-1 bg-primary bg-opacity-10 text-primary rounded-full text-sm"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Lidlar */}
-          {activeTab === 'leads' && (
-            <div>
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Lidlar</h3>
-                <Link
-                  href={`/leads/new?contactId=${contactId}`}
-                  className="text-sm text-primary hover:text-opacity-80"
-                >
-                  + Yangi Lid
-                </Link>
+                )}
+                {contact.branch && (
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">Filial</p>
+                    <p className="text-gray-900">{contact.branch.name}</p>
+                  </div>
+                )}
               </div>
-              {contact.leads && contact.leads.length > 0 ? (
+            </div>
+
+            {/* Notes */}
+            {contact.notes && (
+              <div className="bg-white rounded-lg shadow p-6">
+                <h2 className="text-xl font-bold text-gray-900 mb-4">Izohlar</h2>
+                <p className="text-gray-700 whitespace-pre-wrap">{contact.notes}</p>
+              </div>
+            )}
+
+            {/* Tags */}
+            {contact.tags && contact.tags.length > 0 && (
+              <div className="bg-white rounded-lg shadow p-6">
+                <h2 className="text-xl font-bold text-gray-900 mb-4">Teglar</h2>
+                <div className="flex flex-wrap gap-2">
+                  {contact.tags.map((tag: string, index: number) => (
+                    <span
+                      key={index}
+                      className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Leads */}
+            {contact.leads && contact.leads.length > 0 && (
+              <div className="bg-white rounded-lg shadow p-6">
+                <h2 className="text-xl font-bold text-gray-900 mb-4">Lidlar</h2>
                 <div className="space-y-3">
                   {contact.leads.map((lead: any) => (
                     <Link
@@ -334,39 +162,25 @@ export default function ContactDetailPage() {
                     >
                       <div className="flex justify-between items-start">
                         <div>
-                          <div className="font-medium text-gray-900">{lead.title}</div>
-                          <div className="text-sm text-gray-500 mt-1">
-                            {new Date(lead.createdAt).toLocaleDateString('uz-UZ')}
-                          </div>
+                          <h3 className="font-medium text-gray-900">{lead.title}</h3>
+                          <p className="text-sm text-gray-500 mt-1">
+                            {lead.status} • {lead.source}
+                          </p>
                         </div>
-                        <span className="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                          {lead.status}
+                        <span className="text-xs text-gray-400">
+                          {new Date(lead.createdAt).toLocaleDateString('uz-UZ')}
                         </span>
                       </div>
                     </Link>
                   ))}
                 </div>
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  Hozircha lidlar mavjud emas
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Bitimlar */}
-          {activeTab === 'deals' && (
-            <div>
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Bitimlar</h3>
-                <Link
-                  href={`/deals/new?contactId=${contactId}`}
-                  className="text-sm text-primary hover:text-opacity-80"
-                >
-                  + Yangi Bitim
-                </Link>
               </div>
-              {contact.deals && contact.deals.length > 0 ? (
+            )}
+
+            {/* Deals */}
+            {contact.deals && contact.deals.length > 0 && (
+              <div className="bg-white rounded-lg shadow p-6">
+                <h2 className="text-xl font-bold text-gray-900 mb-4">Bitimlar</h2>
                 <div className="space-y-3">
                   {contact.deals.map((deal: any) => (
                     <Link
@@ -376,36 +190,25 @@ export default function ContactDetailPage() {
                     >
                       <div className="flex justify-between items-start">
                         <div>
-                          <div className="font-medium text-gray-900">{deal.title}</div>
-                          {deal.amount && (
-                            <div className="text-sm font-semibold text-primary mt-1">
-                              {parseFloat(deal.amount).toLocaleString('uz-UZ')} {deal.currency || 'UZS'}
-                            </div>
-                          )}
-                          <div className="text-sm text-gray-500 mt-1">
-                            {new Date(deal.createdAt).toLocaleDateString('uz-UZ')}
-                          </div>
+                          <h3 className="font-medium text-gray-900">{deal.title}</h3>
+                          <p className="text-sm text-gray-500 mt-1">
+                            {deal.stage} • {deal.amount ? `${deal.amount} ${deal.currency}` : 'Summasiz'}
+                          </p>
                         </div>
-                        <span className="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                          {deal.stage}
+                        <span className="text-xs text-gray-400">
+                          {new Date(deal.createdAt).toLocaleDateString('uz-UZ')}
                         </span>
                       </div>
                     </Link>
                   ))}
                 </div>
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  Hozircha bitimlar mavjud emas
-                </div>
-              )}
-            </div>
-          )}
+              </div>
+            )}
 
-          {/* Xabarlar */}
-          {activeTab === 'messages' && (
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Xabarlar</h3>
-              {contact.messages && contact.messages.length > 0 ? (
+            {/* Messages */}
+            {contact.messages && contact.messages.length > 0 && (
+              <div className="bg-white rounded-lg shadow p-6">
+                <h2 className="text-xl font-bold text-gray-900 mb-4">Xabarlar</h2>
                 <div className="space-y-3">
                   {contact.messages.map((message: any) => (
                     <div
@@ -413,27 +216,75 @@ export default function ContactDetailPage() {
                       className="p-4 border border-gray-200 rounded-lg"
                     >
                       <div className="flex justify-between items-start mb-2">
-                        <div className="text-sm font-medium text-gray-900">
+                        <span className="text-sm font-medium text-gray-700">
                           {message.type}
-                        </div>
-                        <div className="text-sm text-gray-500">
+                        </span>
+                        <span className="text-xs text-gray-400">
                           {new Date(message.createdAt).toLocaleString('uz-UZ')}
-                        </div>
+                        </span>
                       </div>
-                      <div className="text-gray-700">{message.content}</div>
+                      <p className="text-gray-700 text-sm">{message.content}</p>
                     </div>
                   ))}
                 </div>
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  Hozircha xabarlar mavjud emas
+              </div>
+            )}
+          </div>
+
+          {/* Sidebar */}
+          <div className="lg:col-span-1 space-y-6">
+            {/* Statistics */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Statistikalar</h2>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Lidlar</span>
+                  <span className="text-2xl font-bold text-gray-900">
+                    {contact._count?.leads || 0}
+                  </span>
                 </div>
-              )}
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Bitimlar</span>
+                  <span className="text-2xl font-bold text-gray-900">
+                    {contact._count?.deals || 0}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Xabarlar</span>
+                  <span className="text-2xl font-bold text-gray-900">
+                    {contact._count?.messages || 0}
+                  </span>
+                </div>
+              </div>
             </div>
-          )}
+
+            {/* Quick Actions */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Tezkor Amallar</h2>
+              <div className="space-y-2">
+                <Link
+                  href={`/leads/new?contactId=${contact.id}`}
+                  className="block w-full text-center bg-primary text-white px-4 py-2 rounded-lg hover:bg-opacity-90 text-sm font-medium"
+                >
+                  + Yangi Lid
+                </Link>
+                <Link
+                  href={`/deals/new?contactId=${contact.id}`}
+                  className="block w-full text-center bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-opacity-90 text-sm font-medium"
+                >
+                  + Yangi Bitim
+                </Link>
+                <Link
+                  href={`/messages?contactId=${contact.id}`}
+                  className="block w-full text-center bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-opacity-90 text-sm font-medium"
+                >
+                  Xabarlarni ko'rish
+                </Link>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </DashboardLayout>
   );
 }
-
