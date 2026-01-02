@@ -1,13 +1,23 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../common/prisma.service';
 import { SettingsService } from '../settings/settings.service';
+import { InstagramService } from './services/instagram.service';
+import { FacebookService } from './services/facebook.service';
+import { TelegramIntegrationService } from './services/telegram.service';
+import { YouTubeService } from './services/youtube.service';
 import axios from 'axios';
 
 @Injectable()
 export class IntegrationsService {
+  private readonly logger = new Logger(IntegrationsService.name);
+
   constructor(
     private prisma: PrismaService,
     private settingsService: SettingsService,
+    private instagramService: InstagramService,
+    private facebookService: FacebookService,
+    private telegramService: TelegramIntegrationService,
+    private youtubeService: YouTubeService,
   ) {}
 
   async getSettings() {

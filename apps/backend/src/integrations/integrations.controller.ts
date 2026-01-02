@@ -35,6 +35,16 @@ export class IntegrationsController {
     }
     return this.integrationsService.testIntegration(platform);
   }
+
+  @Post('sync')
+  @ApiOperation({ summary: 'Barcha integratsiyalardan xabarlarni sinxronlashtirish' })
+  syncMessages(@Request() req) {
+    // Faqat SUPER_ADMIN va BRANCH_MANAGER sinxronlashtirishni boshlashi mumkin
+    if (req.user.role !== 'SUPER_ADMIN' && req.user.role !== 'BRANCH_MANAGER') {
+      throw new Error('Sinxronlashtirish huquqingiz yo\'q');
+    }
+    return this.integrationsService.syncAllMessages();
+  }
 }
 
 
