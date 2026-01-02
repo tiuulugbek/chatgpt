@@ -23,7 +23,7 @@ import { YandexMapsService } from './services/yandex-maps.service';
     GoogleMapsService,
     YandexMapsService,
   ],
-  exports: [IntegrationsService],
+  exports: [IntegrationsService, TelegramIntegrationService],
 })
 export class IntegrationsModule {}
 

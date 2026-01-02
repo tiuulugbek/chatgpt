@@ -99,9 +99,16 @@ export class TelegramIntegrationService {
   }
 
   /**
-   * Telegram'ga xabar yuborish
+   * Telegram'ga xabar yuborish va database'ga saqlash
    */
-  async sendMessage(botToken: string, chatId: string, message: string) {
+  async sendMessage(
+    botToken: string,
+    chatId: string,
+    message: string,
+    branchId?: string,
+    contactId?: string,
+    userId?: string,
+  ) {
     try {
       const response = await axios.post(
         `https://api.telegram.org/bot${botToken}/sendMessage`,
@@ -110,6 +117,48 @@ export class TelegramIntegrationService {
           text: message,
         },
       );
+
+      // Yuborilgan xabarni database'ga saqlash
+      if (response.data.ok && response.data.result) {
+        const telegramMessage = response.data.result;
+        
+        // Contact'ni topish
+        let contact = null;
+        if (contactId) {
+          contact = await this.prisma.contact.findUnique({
+            where: { id: contactId },
+          });
+        } else {
+          contact = await this.prisma.contact.findFirst({
+            where: {
+              OR: [
+                { phone: chatId.toString() },
+                { email: chatId.toString() },
+              ],
+            },
+          });
+        }
+
+        if (contact && branchId) {
+          await this.prisma.message.create({
+            data: {
+              content: message,
+              type: MessageType.TELEGRAM,
+              direction: 'OUTBOUND',
+              contactId: contact.id,
+              branchId,
+              userId,
+              externalId: telegramMessage.message_id?.toString(),
+              metadata: {
+                chatId: chatId.toString(),
+                messageId: telegramMessage.message_id,
+                date: telegramMessage.date,
+                chat: telegramMessage.chat,
+              },
+            },
+          });
+        }
+      }
 
       return response.data;
     } catch (error: any) {
