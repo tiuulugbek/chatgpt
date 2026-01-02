@@ -21,14 +21,14 @@ export function LoginForm() {
 
   const loginMutation = useMutation({
     mutationFn: async (data: LoginData) => {
-      console.log('[LoginForm] Login so'rovi yuborilmoqda...', data);
+      console.log('[LoginForm] Login so\'rovi yuborilmoqda...', data);
       try {
         const response = await api.post('/auth/login', data);
         console.log('[LoginForm] Login muvaffaqiyatli!', response.data);
         return response.data;
       } catch (error: any) {
         console.error('[LoginForm] Login xatosi:', error);
-        console.error('[LoginForm] Xatolik ma'lumotlari:', {
+        console.error('[LoginForm] Xatolik ma\'lumotlari:', {
           message: error.message,
           response: error.response?.data,
           status: error.response?.status,
@@ -43,14 +43,14 @@ export function LoginForm() {
       console.log('[LoginForm] Token:', token ? 'Topildi' : 'Topilmadi');
       if (token) {
         localStorage.setItem('access_token', token);
-        console.log('[LoginForm] Token localStorage\'ga saqlandi');
+        console.log('[LoginForm] Token localStorage ga saqlandi');
         // User ma'lumotlarini cache'ga qo'shish
         queryClient.setQueryData(['me'], data.user);
-        console.log('[LoginForm] Dashboard\'ga yo\'naltirilmoqda...');
+        console.log('[LoginForm] Dashboard ga yo\'naltirilmoqda...');
         router.push('/dashboard');
       } else {
         console.error('[LoginForm] Token topilmadi!', data);
-        setError('Token olinmadi. Qayta urinib ko\'ring.');
+        setError('Token olinmadi. Qayta urinib koring.');
       }
     },
     onError: (err: any) => {

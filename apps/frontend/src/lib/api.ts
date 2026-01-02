@@ -20,7 +20,7 @@ api.interceptors.request.use(
   (config) => {
     // Debug: So'rov URL'ni ko'rsatish
     if (typeof window !== 'undefined') {
-      console.log('[API] So'rov URL:', config.baseURL + config.url);
+      console.log('[API] So\'rov URL:', config.baseURL + config.url);
       const token = localStorage.getItem('access_token');
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
