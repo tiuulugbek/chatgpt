@@ -1,40 +1,50 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
+import { DealStage } from '@prisma/client';
 
-const stageOptions = [
-  { value: 'LEAD', label: 'Lid' },
-  { value: 'CONTACTED', label: 'Aloqa qilindi' },
-  { value: 'PROPOSAL', label: 'Taklif yuborildi' },
-  { value: 'NEGOTIATION', label: 'Muzokara' },
-];
+interface DealFormData {
+  title: string;
+  amount?: number;
+  currency: string;
+  stage: DealStage;
+  probability?: number;
+  expectedCloseDate?: string;
+  notes?: string;
+  contactId?: string;
+  leadId?: string;
+  assigneeId?: string;
+  branchId?: string;
+}
 
 export default function NewDealPage() {
   const router = useRouter();
-  const { user } = useAuth();
+  const searchParams = useSearchParams();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<DealFormData>({
     title: '',
-    amount: '',
+    amount: undefined,
     currency: 'UZS',
-    stage: 'LEAD',
-    probability: '0',
+    stage: DealStage.LEAD,
+    probability: 0,
     expectedCloseDate: '',
     notes: '',
-    contactId: '',
+    contactId: searchParams.get('contactId') || '',
     leadId: '',
+    assigneeId: user?.id || '',
     branchId: user?.branchId || '',
   });
+  const [error, setError] = useState<string>('');
+  const [success, setSuccess] = useState<string>('');
 
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  // Contacts va Leads ro'yxatini olish
+  // Contacts list
   const { data: contacts } = useQuery({
     queryKey: ['contacts'],
     queryFn: async () => {
@@ -44,6 +54,7 @@ export default function NewDealPage() {
     enabled: !!user,
   });
 
+  // Leads list
   const { data: leads } = useQuery({
     queryKey: ['leads'],
     queryFn: async () => {
@@ -53,6 +64,17 @@ export default function NewDealPage() {
     enabled: !!user,
   });
 
+  // Users list (for assignee)
+  const { data: users } = useQuery({
+    queryKey: ['users'],
+    queryFn: async () => {
+      const response = await api.get('/users');
+      return response.data;
+    },
+    enabled: !!user && (user.role === 'SUPER_ADMIN' || user.role === 'BRANCH_MANAGER'),
+  });
+
+  // Branches list
   const { data: branches } = useQuery({
     queryKey: ['branches'],
     queryFn: async () => {
@@ -62,179 +84,187 @@ export default function NewDealPage() {
     enabled: !!user && user.role === 'SUPER_ADMIN',
   });
 
-  const createMutation = useMutation({
-    mutationFn: async (data: any) => {
+  // Create deal mutation
+  const createDealMutation = useMutation({
+    mutationFn: async (data: DealFormData) => {
       const response = await api.post('/deals', data);
       return response.data;
     },
     onSuccess: () => {
+      setSuccess('Bitim muvaffaqiyatli yaratildi!');
+      setError('');
       queryClient.invalidateQueries({ queryKey: ['deals'] });
-      router.push('/deals');
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      setTimeout(() => {
+        router.push('/deals');
+      }, 1500);
     },
-    onError: (error: any) => {
-      const errorData = error.response?.data;
-      if (errorData?.message) {
-        setErrors({ general: errorData.message });
-      }
+    onError: (err: any) => {
+      setError(err.response?.data?.message || 'Bitim yaratishda xatolik yuz berdi.');
+      setSuccess('');
     },
   });
 
+  useEffect(() => {
+    // URL'dan contactId olish
+    const contactId = searchParams.get('contactId');
+    if (contactId) {
+      setFormData((prev) => ({ ...prev, contactId }));
+    }
+  }, [searchParams]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setErrors({});
+    setError('');
+    setSuccess('');
 
-    if (!formData.title.trim()) {
-      setErrors({ title: 'Sarlavha majburiy' });
-      return;
-    }
+    // Clean data - bo'sh qiymatlarni olib tashlash
+    const cleanData: any = { ...formData };
+    if (!cleanData.amount) delete cleanData.amount;
+    if (!cleanData.probability) delete cleanData.probability;
+    if (!cleanData.expectedCloseDate) delete cleanData.expectedCloseDate;
+    if (!cleanData.notes) delete cleanData.notes;
+    if (!cleanData.contactId) delete cleanData.contactId;
+    if (!cleanData.leadId) delete cleanData.leadId;
+    if (!cleanData.assigneeId) delete cleanData.assigneeId;
+    if (!cleanData.branchId) delete cleanData.branchId;
 
-    const payload = {
-      title: formData.title,
-      amount: formData.amount ? parseFloat(formData.amount) : undefined,
-      currency: formData.currency,
-      stage: formData.stage,
-      probability: parseInt(formData.probability) || 0,
-      expectedCloseDate: formData.expectedCloseDate || undefined,
-      notes: formData.notes || undefined,
-      contactId: formData.contactId || undefined,
-      leadId: formData.leadId || undefined,
-      branchId: formData.branchId || user?.branchId,
-    };
-
-    createMutation.mutate(payload);
+    createDealMutation.mutate(cleanData);
   };
 
   return (
     <DashboardLayout>
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-6">
-          <button
-            onClick={() => router.back()}
-            className="text-gray-600 hover:text-gray-900 mb-4"
-          >
-            ← Orqaga
-          </button>
+      <div className="space-y-6">
+        <div>
           <h1 className="text-3xl font-bold text-gray-900">Yangi Bitim Yaratish</h1>
-          <p className="text-gray-600 mt-1">Yangi savdo bitimini qo'shing</p>
+          <p className="text-gray-600 mt-1">Yangi bitim qo'shing</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6 space-y-6">
-          {errors.general && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-              {errors.general}
-            </div>
-          )}
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            {error}
+          </div>
+        )}
+        {success && (
+          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
+            {success}
+          </div>
+        )}
 
-          {/* Asosiy ma'lumotlar */}
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Asosiy ma'lumotlar</h2>
-            <div className="space-y-4">
+        <div className="bg-white rounded-lg shadow p-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+                Bitim nomi *
+              </label>
+              <input
+                id="title"
+                type="text"
+                required
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                placeholder="Masalan: Eshitish apparati sotuvi"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Sarlavha <span className="text-red-500">*</span>
+                <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-2">
+                  Summa
                 </label>
                 <input
-                  type="text"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary ${
-                    errors.title ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="Bitim nomi"
+                  id="amount"
+                  type="number"
+                  value={formData.amount || ''}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      amount: e.target.value ? parseFloat(e.target.value) : undefined,
+                    })
+                  }
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="1000000"
                 />
-                {errors.title && (
-                  <p className="text-red-500 text-sm mt-1">{errors.title}</p>
-                )}
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Summa
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.amount}
-                    onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="0"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Valyuta
-                  </label>
-                  <select
-                    value={formData.currency}
-                    onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                  >
-                    <option value="UZS">UZS</option>
-                    <option value="USD">USD</option>
-                    <option value="EUR">EUR</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Ehtimollik (%)
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={formData.probability}
-                    onChange={(e) => setFormData({ ...formData, probability: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Bosqich
-                  </label>
-                  <select
-                    value={formData.stage}
-                    onChange={(e) => setFormData({ ...formData, stage: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                  >
-                    {stageOptions.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Yopilish sanasi
-                  </label>
-                  <input
-                    type="date"
-                    value={formData.expectedCloseDate}
-                    onChange={(e) =>
-                      setFormData({ ...formData, expectedCloseDate: e.target.value })
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                </div>
+              <div>
+                <label htmlFor="currency" className="block text-sm font-medium text-gray-700 mb-2">
+                  Valyuta
+                </label>
+                <select
+                  id="currency"
+                  value={formData.currency}
+                  onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="UZS">UZS (So'm)</option>
+                  <option value="USD">USD (Dollar)</option>
+                  <option value="EUR">EUR (Yevro)</option>
+                </select>
               </div>
             </div>
-          </div>
 
-          {/* Bog'lanishlar */}
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Bog'lanishlar</h2>
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="stage" className="block text-sm font-medium text-gray-700 mb-2">
+                  Bosqich *
+                </label>
+                <select
+                  id="stage"
+                  required
+                  value={formData.stage}
+                  onChange={(e) => setFormData({ ...formData, stage: e.target.value as DealStage })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  {Object.values(DealStage).map((stage) => (
+                    <option key={stage} value={stage}>
+                      {stage.replace(/_/g, ' ')}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="probability" className="block text-sm font-medium text-gray-700 mb-2">
+                  Ehtimollik (%)
+                </label>
+                <input
+                  id="probability"
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={formData.probability || ''}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      probability: e.target.value ? parseInt(e.target.value) : undefined,
+                    })
+                  }
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="50"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="expectedCloseDate" className="block text-sm font-medium text-gray-700 mb-2">
+                Kutilayotgan yakunlanish sanasi
+              </label>
+              <input
+                id="expectedCloseDate"
+                type="date"
+                value={formData.expectedCloseDate}
+                onChange={(e) => setFormData({ ...formData, expectedCloseDate: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label htmlFor="contactId" className="block text-sm font-medium text-gray-700 mb-2">
                   Mijoz
                 </label>
                 <select
+                  id="contactId"
                   value={formData.contactId}
                   onChange={(e) => setFormData({ ...formData, contactId: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
@@ -247,12 +277,12 @@ export default function NewDealPage() {
                   ))}
                 </select>
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Lid (ixtiyoriy)
+                <label htmlFor="leadId" className="block text-sm font-medium text-gray-700 mb-2">
+                  Lid
                 </label>
                 <select
+                  id="leadId"
                   value={formData.leadId}
                   onChange={(e) => setFormData({ ...formData, leadId: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
@@ -260,71 +290,108 @@ export default function NewDealPage() {
                   <option value="">Lid tanlang</option>
                   {leads?.map((lead: any) => (
                     <option key={lead.id} value={lead.id}>
-                      {lead.title} - {lead.contact?.fullName || 'Mijoz yo\'q'}
+                      {lead.title} ({lead.status})
                     </option>
                   ))}
                 </select>
               </div>
+            </div>
 
-              {user?.role === 'SUPER_ADMIN' && branches && (
+            {user?.role === 'SUPER_ADMIN' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="branchId" className="block text-sm font-medium text-gray-700 mb-2">
                     Filial
                   </label>
                   <select
+                    id="branchId"
                     value={formData.branchId}
                     onChange={(e) => setFormData({ ...formData, branchId: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                   >
                     <option value="">Filial tanlang</option>
-                    {branches.map((branch: any) => (
+                    {branches?.map((branch: any) => (
                       <option key={branch.id} value={branch.id}>
                         {branch.name}
                       </option>
                     ))}
                   </select>
                 </div>
-              )}
-            </div>
-          </div>
+                <div>
+                  <label htmlFor="assigneeId" className="block text-sm font-medium text-gray-700 mb-2">
+                    Mas'ul
+                  </label>
+                  <select
+                    id="assigneeId"
+                    value={formData.assigneeId}
+                    onChange={(e) => setFormData({ ...formData, assigneeId: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    <option value="">Mas'ul tanlang</option>
+                    {users?.map((u: any) => (
+                      <option key={u.id} value={u.id}>
+                        {u.firstName} {u.lastName} ({u.role})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
 
-          {/* Qo'shimcha ma'lumotlar */}
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Qo'shimcha ma'lumotlar</h2>
+            {(user?.role === 'BRANCH_MANAGER' || user?.role === 'BRANCH_STAFF') && (
+              <div>
+                <label htmlFor="assigneeId" className="block text-sm font-medium text-gray-700 mb-2">
+                  Mas'ul
+                </label>
+                <select
+                  id="assigneeId"
+                  value={formData.assigneeId}
+                  onChange={(e) => setFormData({ ...formData, assigneeId: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="">Mas'ul tanlang</option>
+                  {users?.map((u: any) => (
+                    <option key={u.id} value={u.id}>
+                      {u.firstName} {u.lastName} ({u.role})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-2">
                 Izohlar
               </label>
               <textarea
+                id="notes"
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                 rows={4}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="Bitim haqida qo'shimcha ma'lumot..."
+                placeholder="Bitim haqida qo'shimcha ma'lumotlar..."
               />
             </div>
-          </div>
 
-          {/* Tugmalar */}
-          <div className="flex justify-end gap-4 pt-4 border-t">
-            <button
-              type="button"
-              onClick={() => router.back()}
-              className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
-            >
-              Bekor qilish
-            </button>
-            <button
-              type="submit"
-              disabled={createMutation.isPending}
-              className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {createMutation.isPending ? 'Saqlanmoqda...' : 'Saqlash'}
-            </button>
-          </div>
-        </form>
+            <div className="flex justify-end space-x-3 pt-4">
+              <button
+                type="button"
+                onClick={() => router.back()}
+                className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+              >
+                Bekor qilish
+              </button>
+              <button
+                type="submit"
+                disabled={createDealMutation.isPending}
+                className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {createDealMutation.isPending ? 'Yaratilmoqda...' : 'Bitim Yaratish'}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </DashboardLayout>
   );
 }
-
