@@ -65,6 +65,12 @@ export class LeadsController {
   remove(@Param('id') id: string, @Request() req) {
     return this.leadsService.remove(id, req.user);
   }
+
+  @Post(':id/notes')
+  @ApiOperation({ summary: 'Lidga izoh qo\'shish' })
+  addNote(@Param('id') id: string, @Body() body: { content: string }, @Request() req) {
+    return this.leadsService.addNote(id, body.content, req.user);
+  }
 }
 
 

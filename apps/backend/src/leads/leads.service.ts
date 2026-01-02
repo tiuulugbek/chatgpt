@@ -199,5 +199,32 @@ export class LeadsService {
 
     return { message: 'Lid o\'chirildi' };
   }
+
+  async addNote(leadId: string, content: string, currentUser: any) {
+    await this.findOne(leadId, currentUser);
+
+    const note = await this.prisma.leadNote.create({
+      data: {
+        leadId,
+        content,
+        userId: currentUser.id,
+      },
+      include: {
+        user: true,
+      },
+    });
+
+    await this.prisma.auditLog.create({
+      data: {
+        action: 'CREATE',
+        entityType: 'LeadNote',
+        entityId: note.id,
+        userId: currentUser.id,
+        changes: { leadId, content } as any,
+      },
+    });
+
+    return note;
+  }
 }
 
