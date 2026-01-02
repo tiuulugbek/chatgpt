@@ -1,111 +1,91 @@
 # Soundz CRM - Loyiha Holati
 
-## ✅ Bajarilgan ishlar
+## ✅ Yakunlangan Modullar
 
-### 1. Loyiha Struktura
-- ✅ Monorepo struktura (Turborepo + pnpm)
-- ✅ Backend, Frontend, Admin va Shared paketlar
-- ✅ Asosiy konfiguratsiya fayllari
+### 1. Backend (NestJS)
+- ✅ Authentication & Authorization (JWT, RBAC)
+- ✅ Users Management API
+- ✅ Branches Management API
+- ✅ Leads Management API
+- ✅ Deals Management API
+- ✅ Contacts Management API
+- ✅ Messages Management API
+- ✅ Reports & Analytics API
+- ✅ Settings API
+- ✅ Integrations API
+- ✅ Search API
+- ✅ Audit Log
 
-### 2. Database Schema (Prisma)
-- ✅ To'liq Prisma schema yaratildi
-- ✅ Barcha modellar:
-  - Users (foydalanuvchilar)
-  - Branches (filiallar)
-  - Contacts (mijozlar)
-  - Leads (lidlarni)
-  - Deals (bitimlar)
-  - Messages (xabarlar)
-  - Reviews (sharhlar)
-  - AuditLog (faoliyat jurnali)
-  - Settings (sozlamalar)
-  - SocialAccount (ijtimoiy tarmoq akkauntlari)
+### 2. Frontend (Next.js)
+- ✅ Dashboard - Real statistikalar, grafiklar, o'sish foizlari
+- ✅ Leads - CRUD, filtrlash, qidiruv, status o'zgartirish
+- ✅ Deals - Kanban taxtasi, pipeline, status o'zgartirish
+- ✅ Contacts - CRUD, aloqa tarixi, qidiruv
+- ✅ Messages - Platforma tab'lar, javob berish, filtrlash
+- ✅ Reports - Lidlar, bitimlar va xodimlar faolligi hisobotlari
+- ✅ Admin Panel - Foydalanuvchilar boshqaruvi
+- ✅ Admin Panel - Filiallar boshqaruvi
+- ✅ Admin Panel - Sozlamalar (Platformalar ko'rinishi)
+- ✅ Admin Panel - Integratsiyalar
 
-### 3. Backend API (NestJS)
-- ✅ Auth moduli (login, register, JWT)
-- ✅ Users moduli (CRUD)
-- ✅ Branches moduli (CRUD)
-- ✅ Leads moduli (CRUD)
-- ✅ Deals moduli (CRUD + Pipeline)
-- ✅ Contacts moduli
-- ✅ Messages moduli
-- ✅ Reviews moduli
-- ✅ Reports moduli (Dashboard)
-- ✅ Integrations moduli (asosiy struktura)
-- ✅ Role-based access control (RBAC)
-- ✅ Swagger API dokumentatsiyasi
-- ✅ Audit logging
+### 3. Database (PostgreSQL + Prisma)
+- ✅ To'liq schema yaratilgan
+- ✅ Migration'lar qo'llangan
+- ✅ Seed data mavjud
 
-### 4. Xavfsizlik
-- ✅ JWT autentifikatsiya
-- ✅ Role-based guards
-- ✅ Password hashing (bcrypt)
-- ✅ CORS konfiguratsiyasi
-
-## 🚧 Qolgan ishlar
+## 🔄 Qolgan Vazifalar
 
 ### 1. Ijtimoiy Tarmoqlar Integratsiyasi
-- ⏳ Instagram integratsiyasi (Graph API)
-- ⏳ Facebook integratsiyasi (Graph API)
-- ⏳ Telegram bot integratsiyasi
-- ⏳ YouTube integratsiyasi (Data API)
+- ⏳ Instagram Graph API - izohlar va DM'larni olish
+- ⏳ Facebook Graph API - xabarlar va izohlarni olish
+- ⏳ Telegram Bot API - xabarlarni qabul qilish va javob berish
+- ⏳ YouTube Data API - izohlarni olish
 
 ### 2. Maps Integratsiyasi
-- ⏳ Google Maps sharhlarini integratsiya qilish
-- ⏳ Yandex Maps sharhlarini integratsiya qilish
+- ⏳ Google Maps Reviews - sharhlarni olish
+- ⏳ Yandex Maps Reviews - sharhlarni olish
 
-### 3. Frontend (Next.js)
-- ⏳ Asosiy struktura
-- ⏳ Dashboard sahifasi
-- ⏳ Mijozlar sahifasi
-- ⏳ Lidlar sahifasi
-- ⏳ Bitimlar sahifasi (Kanban)
-- ⏳ Xabarlar sahifasi
-- ⏳ Hisobotlar sahifasi
-- ⏳ O'zbek tilida interfeys
+### 3. Qo'shimcha Funksiyalar
+- ⏳ Telegram Mini-App integratsiyasi
+- ⏳ Real-time notifications (WebSocket)
+- ⏳ Email integratsiyasi
+- ⏳ File upload va media management
 
-### 4. Admin Panel (React + Ant Design)
-- ⏳ Asosiy struktura
-- ⏳ Foydalanuvchilar boshqaruvi
-- ⏳ Filiallar boshqaruvi
-- ⏳ Sozlamalar sahifasi
-- ⏳ Integratsiya sozlamalari
+## 📊 Statistikalar
 
-### 5. Telegram Mini-App
-- ⏳ Telegram bot yaratish
-- ⏳ Mini-app integratsiyasi
+- **Backend API Endpoints**: 50+
+- **Frontend Sahifalar**: 15+
+- **Database Models**: 10+
+- **Admin Panel Modullar**: 4
 
-## 📝 Keyingi Qadamlar
+## 🚀 Ishlatish
 
-1. **Frontend yaratish** - Next.js bilan asosiy sahifalar
-2. **Admin panel** - React + Ant Design bilan boshqaruv paneli
-3. **Integratsiyalar** - Instagram, Facebook, Telegram, YouTube
-4. **Maps integratsiyasi** - Google va Yandex sharhlar
-5. **Telegram Mini-App** - Telegram ichida ishlaydigan versiya
-
-## 🚀 Ishga Tushirish
-
+### Backend ishga tushirish:
 ```bash
-# Dependencies o'rnatish
+cd apps/backend
 pnpm install
-
-# Database migrate
 pnpm db:generate
 pnpm db:migrate
 pnpm db:seed
-
-# Development rejimida ishga tushirish
 pnpm dev
 ```
 
-Backend: http://localhost:3001
-API Docs: http://localhost:3001/api/docs
+### Frontend ishga tushirish:
+```bash
+cd apps/frontend
+pnpm install
+pnpm dev
+```
 
-## 📧 Test Foydalanuvchilar
+### Test Foydalanuvchilar:
+- Super Admin: admin@soundz.uz / admin123
+- Filial Rahbari: manager@soundz.uz / manager123
+- Filial Xodimi: staff@soundz.uz / staff123
 
-- **Super Admin**: admin@soundz.uz / admin123
-- **Filial Rahbari**: manager@soundz.uz / manager123
-- **Filial Xodimi**: staff@soundz.uz / staff123
+## 📝 Keyingi Qadamlar
 
-
-
+1. Ijtimoiy tarmoqlar integratsiyasini to'liq implementatsiya qilish
+2. Google Maps va Yandex Maps sharhlarini integratsiya qilish
+3. Real-time notifications qo'shish
+4. Telegram Mini-App integratsiyasi
+5. Production deployment
