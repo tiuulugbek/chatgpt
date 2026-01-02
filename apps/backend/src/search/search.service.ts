@@ -37,7 +37,7 @@ export class SearchService {
         where: {
           OR: [
             { title: { contains: searchTerm, mode: 'insensitive' } },
-            { description: { contains: searchTerm, mode: 'insensitive' } },
+            { notes: { contains: searchTerm, mode: 'insensitive' } },
             { contact: { fullName: { contains: searchTerm, mode: 'insensitive' } } },
           ],
         },

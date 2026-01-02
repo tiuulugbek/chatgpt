@@ -43,12 +43,24 @@ export class ReportsService {
       this.prisma.message.count({ where: { contact: where } }),
     ]);
 
-    // Deal status breakdown
-    const dealStatuses = await this.prisma.deal.groupBy({
-      by: ['status'],
-      where,
-      _count: true,
+    // Deal status breakdown - use findMany instead of groupBy to avoid type issues
+    const allDeals = await this.prisma.deal.findMany({
+      where: where as any,
+      select: {
+        stage: true,
+      },
     });
+
+    const dealStatusesMap = allDeals.reduce((acc, deal) => {
+      const status = deal.stage;
+      acc[status] = (acc[status] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    const dealStatuses = Object.entries(dealStatusesMap).map(([status, count]) => ({
+      status,
+      count,
+    }));
 
     return {
       leads,
@@ -61,10 +73,7 @@ export class ReportsService {
         contacts: totalContacts,
         messages: totalMessages,
       },
-      dealStatuses: dealStatuses.map((d) => ({
-        status: d.status,
-        count: d._count,
-      })),
+      dealStatuses,
     };
   }
 }
