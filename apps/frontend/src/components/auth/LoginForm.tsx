@@ -25,10 +25,16 @@ export function LoginForm() {
       return response.data;
     },
     onSuccess: (data) => {
-      localStorage.setItem('access_token', data.accessToken);
-      // User ma'lumotlarini cache'ga qo'shish
-      queryClient.setQueryData(['me'], data.user);
-      router.push('/dashboard');
+      // Backend'dan kelgan token nomini tekshirish
+      const token = data.accessToken || data.access_token;
+      if (token) {
+        localStorage.setItem('access_token', token);
+        // User ma'lumotlarini cache'ga qo'shish
+        queryClient.setQueryData(['me'], data.user);
+        router.push('/dashboard');
+      } else {
+        setError('Token olinmadi. Qayta urinib ko\'ring.');
+      }
     },
     onError: (err: any) => {
       setError(

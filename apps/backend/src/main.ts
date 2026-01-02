@@ -12,9 +12,12 @@ async function bootstrap() {
 
   app.useLogger(app.get(Logger));
 
+  // Global prefix
+  app.setGlobalPrefix('api');
+
   // CORS
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: process.env.FRONTEND_URL || 'http://localhost:3003',
     credentials: true,
   });
 
