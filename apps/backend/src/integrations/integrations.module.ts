@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { IntegrationsController } from './integrations.controller';
+import { TelegramWebhookController } from './telegram-webhook.controller';
 import { IntegrationsService } from './integrations.service';
 import { SettingsModule } from '../settings/settings.module';
 import { PrismaModule } from '../common/prisma.module';
@@ -12,7 +13,7 @@ import { YandexMapsService } from './services/yandex-maps.service';
 
 @Module({
   imports: [SettingsModule, PrismaModule],
-  controllers: [IntegrationsController],
+  controllers: [IntegrationsController, TelegramWebhookController],
   providers: [
     IntegrationsService,
     InstagramService,
