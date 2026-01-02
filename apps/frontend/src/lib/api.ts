@@ -2,6 +2,11 @@ import axios from 'axios';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
+// Debug: API URL'ni console'ga chiqarish
+if (typeof window !== 'undefined') {
+  console.log('[API] API URL:', API_URL);
+}
+
 export const api = axios.create({
   baseURL: API_URL,
   withCredentials: true,
@@ -10,10 +15,12 @@ export const api = axios.create({
   },
 });
 
-// Request interceptor - token qo'shish
+// Request interceptor - token qo'shish va debug
 api.interceptors.request.use(
   (config) => {
+    // Debug: So'rov URL'ni ko'rsatish
     if (typeof window !== 'undefined') {
+      console.log('[API] So'rov URL:', config.baseURL + config.url);
       const token = localStorage.getItem('access_token');
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
