@@ -17,8 +17,7 @@ Bu tizim amoCRM va Bitrix24 kabi ishlaydigan mijozlar bilan munosabatlarni boshq
 
 Monorepo struktura:
 - `apps/backend` - NestJS backend API
-- `apps/frontend` - Next.js frontend (xodimlar uchun)
-- `apps/admin` - React admin panel (CRM adminlar uchun)
+- `apps/frontend` - Next.js frontend (CRM interfeysi - xodimlar va adminlar uchun)
 - `packages/shared` - Umumiy tip va utilitlar
 
 ## 🚀 Boshlash
@@ -49,8 +48,7 @@ pnpm dev
 soundz-crm/
 ├── apps/
 │   ├── backend/      # NestJS API
-│   ├── frontend/     # Next.js frontend
-│   └── admin/        # React admin panel
+│   └── frontend/     # Next.js frontend (CRM interfeysi)
 ├── packages/
 │   └── shared/       # Umumiy kod
 ├── prisma/           # Database schema
